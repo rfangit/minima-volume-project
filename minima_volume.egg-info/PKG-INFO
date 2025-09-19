@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: minima-volume
+Version: 0.1.0
+Summary: Functions for estimating the volume of minima, and generating high test loss minima
+Author: Raymond Fan
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: numpy
+Requires-Dist: torch
+Requires-Dist: matplotlib
+Requires-Dist: plotly

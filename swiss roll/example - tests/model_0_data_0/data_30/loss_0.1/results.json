@@ -1,0 +1,77 @@
+{
+  "test_loss_values": [
+    0.2957922176271677,
+    4.285101741552353
+  ],
+  "log_exp_r_n_values": [
+    2375.994446649179,
+    3833.720842816176
+  ],
+  "log_exp_r_n_acc_values": [
+    -Infinity,
+    -Infinity
+  ],
+  "model_data_levels": [
+    100,
+    30
+  ],
+  "loss_landscape_data_param": 30,
+  "train_loss_values": [
+    0.00025183643447235227,
+    0.0003316235088277608
+  ],
+  "num_params": 4353,
+  "dataset_type": "data",
+  "top_r_vals": [
+    [
+      1.7266772842056934,
+      1.1424786898812744,
+      0.8223585905852142,
+      0.8089566642855421,
+      0.6570780037641649
+    ],
+    [
+      2.413498808322981,
+      1.7266772842056934,
+      1.1424786898812744,
+      1.1104618263614385,
+      0.6796351988307556
+    ]
+  ],
+  "top_r_val_seeds": [
+    [
+      4,
+      1,
+      3,
+      2,
+      5
+    ],
+    [
+      2,
+      4,
+      1,
+      5,
+      3
+    ]
+  ],
+  "loss_predicts_minimas": true,
+  "loss_ordering_violations": 1,
+  "test_loss_ranks": [
+    2,
+    1
+  ],
+  "log_exp_r_n_ranks": [
+    2,
+    1
+  ],
+  "data_level_ranks": [
+    1,
+    2
+  ],
+  "accuracy_predicts_minimas": false,
+  "accuracy_ordering_violations": 0,
+  "log_exp_r_n_acc_ranks": [
+    1,
+    2
+  ]
+}

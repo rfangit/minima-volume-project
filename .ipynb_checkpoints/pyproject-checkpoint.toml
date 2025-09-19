@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minima-volume"
+version = "0.1.0"
+description = "Functions for estimating the volume of minima, and generating high test loss minima"
+authors = [{ name = "Raymond Fan" }]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "torch",
+    "matplotlib",
+    "plotly"
+]
+
+# Add this section for package discovery
+[tool.setuptools]
+packages = ["minima_volume"]

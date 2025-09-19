@@ -1,0 +1,28 @@
+# Ignore any file named dataset.pt (at any depth)
+**/dataset.pt
+
+# Ignore any folder containing "_old" (recursively)
+**/*_old/
+
+# Ignore CIFAR-10 dataset files and extracted folders
+cifar-10-python.tar.gz
+cifar-10-batches-py/
+
+# Ignore MNIST raw dataset files (common structure for torchvision)
+MNIST/raw/
+MNIST/processed/test.pt
+MNIST/processed/training.pt
+
+# Ignore all .pt, .png, and .npz files
+**/*.pt
+**/*.png
+**/*.npz
+
+# Ignore perturb_probs folders
+**/perturb_probs/
+
+# Ignore Python cache
+__pycache__/
+
+# Ignore videos directory
+videos/
