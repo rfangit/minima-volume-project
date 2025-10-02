@@ -61,6 +61,9 @@ from itertools import cycle
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.collections import LineCollection
+from matplotlib.legend_handler import HandlerTuple
 from scipy.stats import rankdata
 
 # ============================================================
@@ -140,6 +143,39 @@ def load_perturb_probs(model_folder, data_modification, loss_value):
     radii_rank_probabilities_full_levels = results["radii_rank_probabilities_full"]
 
     return list(subset_sizes_values), list(radii_rank_probabilities_values), list(radii_rank_probabilities_full_levels)
+
+def load_param_num(experiment_folder, data_modification, loss_value):
+    """
+    Load num_params from results.json in a specific experiment/data modification/loss folder.
+    
+    Parameters:
+        experiment_folder (str): Path to the experiment folder
+        data_modification (str): Data modification folder name
+        loss_value (float): Loss value to look for
+        
+    Returns:
+        int: Number of parameters, or None if not found
+    """
+    results_path = Path(experiment_folder) / data_modification / f"loss_{loss_value}" / "results.json"
+    
+    if not results_path.exists():
+        print(f"Warning: {results_path} does not exist!")
+        return None
+
+    try:
+        with open(results_path, "r") as f:
+            results = json.load(f)
+        
+        # Check if num_params exists in the results
+        if "num_params" in results:
+            return results["num_params"]
+        else:
+            print(f"Warning: 'num_params' not found in {results_path}")
+            return None
+            
+    except (json.JSONDecodeError, KeyError, IOError) as e:
+        print(f"Error reading {results_path}: {e}")
+        return None
 
 def load_base_train_size(experiment_folder: str) -> int:
     """
@@ -428,7 +464,7 @@ def fixed_landscape_minima_labels(data_modification_folder: str, base_train_size
         title_loss = f"Test Loss Vs Volumes (Landscape W/ {base_train_size + data_size} Data)"
 
     elif data_modification_folder.startswith(("poison", "noise")):
-        xlabel = "Poisoned Dataset Size"
+        xlabel = "Additional Poisoned Examples"
         title_volume = (
             f"Poisoned Dataset Size vs Log Volume "
             f"(Initial {base_train_size} Correct Points)"
@@ -458,19 +494,19 @@ def varying_landscape_minima_labels(data_modification_folder: str, base_train_si
     # Figure out prefix
     if data_modification_folder.startswith("data"):
         data_type = "data"
-        xlabel = "Dataset Size"
+        xlabel = "# Of Examples In Loss Landscape"
         title_volume = "Dataset Size Vs Log Volume"
         title_loss = "Dataset Size Vs Test Loss"
 
     elif data_modification_folder.startswith("poison"):
         data_type = "poison"
-        xlabel = "Poisoned Dataset Size"
+        xlabel = "# Of Poisoned Examples In Loss Landscape"
         title_volume = f"Poisoned Dataset Size Vs Log Volume (Initial {base_train_size} Correct Points)"
         title_loss = f"Poisoned Dataset Size Vs Test Loss (Initial {base_train_size} Correct Points)"
 
     elif data_modification_folder.startswith("noise"):
         data_type = "noise"
-        xlabel = "Noisy Dataset Size"
+        xlabel = "# Of Noisy Examples In Loss Landscape"
         title_volume = f"Noisy Dataset Size Vs Log Volume (Initial {base_train_size} Correct Points)"
         title_loss = f"Noisy Dataset Size Vs Test Loss (Initial {base_train_size} Correct Points)"
 
@@ -495,7 +531,15 @@ def plot_fixed_landscape_minima_pair(
     plot_x_error=False,             # NEW: include x error bars if True
     show_plot=True,
     xlabel_size=12, ylabel_size=12, title_size=14,
+    legend_size=12,
     base_shift=0,
+    show_average_spread_label = True,
+    # Special plotting parameters:
+    background_colors=None,         # list of colors for per-run lines (len = len(all_x))
+    natural_label=None,             # legend label for "natural" minima (first point)
+    other_label=None,               # legend label for all other points
+    natural_marker="o",             # marker style for natural minima
+    other_marker="o",               # marker style for others
 ):
     """
     General-purpose plotting function for relationships between model data.
@@ -521,7 +565,7 @@ def plot_fixed_landscape_minima_pair(
         xlabel_size (int): Font size for x-axis label.
         ylabel_size (int): Font size for y-axis label.
         title_size (int): Font size for title.
-        base_shift (float): Optional constant to add to all x-values.
+        base_shift (float): Optional constant to add to all x-values. Used for data level plots.
     """
     # Title logic
     if title is None:
@@ -534,7 +578,7 @@ def plot_fixed_landscape_minima_pair(
 
     processed_x, processed_y = [], []
 
-    for x_vals, y_vals in zip(all_x, all_y):
+    for i, (x_vals, y_vals) in enumerate(zip(all_x, all_y)):
         x_vals = [x + base_shift for x in x_vals]
 
         if sort_x:
@@ -556,11 +600,13 @@ def plot_fixed_landscape_minima_pair(
         if np.isinf(y_array_check).any():
             print(f"⚠️ Inf detected in y_vals: {y_array_check}")
 
-        plt.plot(x_vals, y_vals, marker="o", alpha=alpha)
+        # Use custom colors if provided
+        color = background_colors[i] if background_colors is not None else None
+        plt.plot(x_vals, y_vals, marker="o", linestyle="--", alpha=alpha, color=color)
 
         processed_x.append(x_vals)
         processed_y.append(y_vals)
-
+    
     if plot_average and processed_x:
         x_array = np.array(processed_x)
         y_array = np.array(processed_y)
@@ -574,7 +620,7 @@ def plot_fixed_landscape_minima_pair(
             x_high = np.percentile(x_array, 75, axis=0)
             label_center = "Median"
             label_spread = "IQR (25–75%)"
-            color = "red"
+            color = "black"
         else:
             x_ref = np.mean(x_array, axis=0)
             center_y = np.mean(y_array, axis=0)
@@ -584,23 +630,127 @@ def plot_fixed_landscape_minima_pair(
             x_low, x_high = x_ref - x_std, x_ref + x_std
             label_center = "Mean"
             label_spread = "1 Std"
-            color = "red"
+            color = "black"
     
         if average_style == "shaded":
-            plt.plot(x_ref, center_y, color=color, linewidth=3, label=label_center)
-            plt.fill_between(x_ref, y_low, y_high, color=color, alpha=0.2, label=label_spread)
+            plt.plot(x_ref, center_y, color=color, linewidth=3, linestyle=":",
+                     label=label_center)
+            plt.fill_between(x_ref, y_low, y_high, color=color, alpha=0.2,
+                             label=label_spread if show_average_spread_label else None)
+    
         elif average_style == "errorbar":
+            # --- Step 1: plot the connecting line first ---
+            plt.plot(x_ref, center_y, color=(0, 0, 0), linewidth=2, linestyle="-", alpha = 0.9)
+    
+            # --- Step 2: prepare errors and masks ---
             xerr = np.vstack([x_ref - x_low, x_high - x_ref]) if plot_x_error else None
             yerr = np.vstack([center_y - y_low, y_high - center_y])
-            plt.errorbar(
-                x_ref, center_y,
-                xerr=xerr, yerr=yerr,
-                fmt='-o', color=color, linewidth=3, label=f"{label_center} ± {label_spread}"
-            )
-        elif average_style == "none":  # <-- NEW OPTION
-            plt.plot(x_ref, center_y, color=color, linewidth=2, label=label_center)
     
-        plt.legend()
+            smallest_idx = np.argmin(x_ref)
+            mask_first = np.zeros_like(x_ref, dtype=bool)
+            mask_first[smallest_idx] = True
+            mask_rest = ~mask_first
+
+            # --- Step 3: plot first point separately ---
+            if natural_label is not None:
+                plt.errorbar(
+                    x_ref[mask_first], center_y[mask_first],
+                    xerr=xerr[:, mask_first] if xerr is not None else None,
+                    yerr=yerr[:, mask_first],
+                    fmt=natural_marker, linestyle="none",
+                    markersize=13,
+                    mfc='red',       # marker fill
+                    mec='black',     # marker edge
+                    mew=1.5,           # edge width
+                    ecolor='black',  # error bar color
+                    elinewidth=2,    # error bar thickness
+                    capsize=4,       # cap size
+                    capthick=2,      # cap thickness
+                    zorder=5,
+                    label=natural_label
+                )
+            else:
+                plt.errorbar(
+                    x_ref[mask_first], center_y[mask_first],
+                    xerr=xerr[:, mask_first] if xerr is not None else None,
+                    yerr=yerr[:, mask_first],
+                    fmt=natural_marker, linestyle="none",
+                    markersize=13,
+                    mfc='red',
+                    mec='black',
+                    mew=1.5,
+                    ecolor='black',
+                    elinewidth=2,
+                    capsize=4,
+                    capthick=2,
+                    zorder=5,
+                    label=(f"{label_center} ± {label_spread}" if show_average_spread_label else None)
+                )
+            
+            # --- Plot remaining points ---
+            plt.errorbar(
+                x_ref[mask_rest], center_y[mask_rest],
+                xerr=xerr[:, mask_rest] if xerr is not None else None,
+                yerr=yerr[:, mask_rest],
+                fmt=other_marker, linestyle="none", 
+                markersize=10,
+                mfc='red',       # red fill
+                mec='black',     # black border
+                mew=1.5,
+                ecolor='black',  # error bars black
+                elinewidth=2,    # thicker error bar
+                capsize=4,       # caps larger
+                capthick=2,      # thicker caps
+                zorder=4,
+                label=(other_label if other_label is not None else None)
+            )
+        elif average_style == "none":
+            plt.plot(x_ref, center_y, color=color, linewidth=2, linestyle=":",
+                     label=label_center)
+
+        # --- Step 5: create legend entries manually ---
+        legend_handles = []
+        legend_labels = []
+
+        if natural_label is not None:
+            legend_handles.append(Line2D([0], [0], marker='^', color='w',
+                                         markerfacecolor='red', markeredgecolor='black',
+                                         markersize=10, mew=1.5))
+            legend_labels.append(natural_label)
+        
+        if other_label is not None:
+            legend_handles.append(Line2D([0], [0], marker='o', color='w',
+                                         markerfacecolor='red', markeredgecolor='black',
+                                         markersize=10, mew=1.5))
+            legend_labels.append(other_label)
+            
+       # Create a dummy plot that's completely invisible
+        dummy_fig, dummy_ax = plt.subplots()
+        dummy_err = dummy_ax.errorbar(
+            [0], [0],
+            xerr=0.2, yerr=0.2,  # Use scalar values instead of lists for simplicity
+            fmt='o',
+            markersize=1,
+            mfc='red',
+            mec='black',
+            mew=1,
+            ecolor='black',
+            elinewidth=1,
+            capsize=3,
+            capthick=2,
+            linestyle="none"
+        )
+        
+        # Get the handle and close the dummy figure
+        legend_handle = dummy_err
+        plt.close(dummy_fig)
+        
+        legend_handles.append(legend_handle)
+        legend_labels.append(f"{label_center} ± {label_spread}" if show_average_spread_label else label_center)
+
+        plt.legend(handles=legend_handles,
+           labels=legend_labels,
+           fontsize=legend_size)
 
     plt.xlabel(xlabel_plot, fontsize=xlabel_size)
     plt.ylabel(ylabel_plot, fontsize=ylabel_size)
@@ -646,6 +796,7 @@ def plot_perturb_probs(
     xlabel_size=12,
     ylabel_size=12,
     title_size=14,
+    legend_size=12,
     ylim=None,
     output_dir=None,
     filename=None
@@ -705,6 +856,7 @@ def plot_minima_volume_vs_data_level(
     xlabel="Loss Landscape Data Level",
     ylabel="Log Volume",
     title=None,
+    suptitle=None,
     alpha=0.7,
     log_scale=False,
     output_dir="imgs/volume_plots",
@@ -713,7 +865,10 @@ def plot_minima_volume_vs_data_level(
     plot_average=False,
     plot_only_average=False,
     show_plot = True,
-    xlabel_size=12, ylabel_size=12, title_size=14,
+    central_tendency="mean", 
+    xlabel_size=12, ylabel_size=12, title_size=14, suptitle_size=18,
+    legend_size=12, legend_title_fontsize = 12, legend_loc = "best",
+    show_legend=True,
     data_type=None,              
     base_train_size=None,         
     xlim=None,                  
@@ -740,6 +895,9 @@ def plot_minima_volume_vs_data_level(
                               - "poison"/"noise" → Incorrect Points: {target}
                               If None → fallback to old behaviour.
         base_train_size (int|None): Needed for "data" type to shift dataset sizes.
+    Returns:
+        found_minima_vol (list): List of the naturally found minima volumes in their natural dataset
+        found_minima_dataset (list): List of datasets where the above minima were found
     """
     # Title logic
     if title is None:
@@ -748,6 +906,9 @@ def plot_minima_volume_vs_data_level(
     plt.figure(figsize=(6, 5))
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
+
+    found_minima_vol = []
+    found_minima_dataset = []
 
     # Legend title depends on whether data_type is given
     if data_type is None:
@@ -775,7 +936,7 @@ def plot_minima_volume_vs_data_level(
         elif data_type == "data":
             if base_train_size is None:
                 raise ValueError("base_train_size must be provided when data_type='data'")
-            label_str = f"Dataset Size {target_level + base_train_size}"
+            label_str = f"{target_level + base_train_size:,} Examples"
         elif data_type in {"poison", "noise"}:
             label_str = f"Incorrect Points: {target_level}"
         else:
@@ -804,29 +965,40 @@ def plot_minima_volume_vs_data_level(
                         zorder=3
                     )
 
-        # Plot average ± std shading if requested
+        # Plot average ± shading if requested
         if plot_average:
-            mean_y = np.mean(log_exp_matrix, axis=0)
-            std_y = np.std(log_exp_matrix, axis=0)
-
+            if central_tendency == "median":
+                center_y = np.median(log_exp_matrix, axis=0)
+                y_low = np.percentile(log_exp_matrix, 25, axis=0)
+                y_high = np.percentile(log_exp_matrix, 75, axis=0)
+                label_center = "Median"
+                label_spread = "IQR (25–75%)"
+            else:  # mean (default)
+                center_y = np.mean(log_exp_matrix, axis=0)
+                y_std = np.std(log_exp_matrix, axis=0)
+                y_low = center_y - y_std
+                y_high = center_y + y_std
+                label_center = "Mean"
+                label_spread = "1 Std"
+        
             if sort_x:
-                pairs = sorted(zip(data_levels, mean_y, std_y), key=lambda p: p[0])
-                data_levels, mean_y, std_y = zip(*pairs)
-
+                pairs = sorted(zip(data_levels, center_y, y_low, y_high), key=lambda p: p[0])
+                data_levels, center_y, y_low, y_high = zip(*pairs)
+        
             plt.plot(
-                data_levels, mean_y,
+                data_levels, center_y,
                 color=color, linewidth=2.5, label=label_str
             )
             plt.fill_between(
-                data_levels, np.array(mean_y) - np.array(std_y), np.array(mean_y) + np.array(std_y),
+                data_levels, np.array(y_low), np.array(y_high),
                 color=color, alpha=0.2
             )
-
-            # Large dot at averaged curve
+        
+            # Large dot at center curve
             if target_level + base_shift in data_levels:
                 idx = data_levels.index(target_level + base_shift)
                 plt.scatter(
-                    target_level + base_shift, mean_y[idx],
+                    target_level + base_shift, center_y[idx],
                     color=color,
                     s=140,
                     edgecolors="black",
@@ -834,9 +1006,11 @@ def plot_minima_volume_vs_data_level(
                     alpha=1.0,
                     zorder=4
                 )
+                found_minima_vol.append(target_level + base_shift)
+                found_minima_dataset.append(center_y[idx])
         elif plot_only_average:
             plt.plot([], [], color=color, marker="o", linestyle="", label=label_str)
-
+    
     # Axis labels and title
     plt.xlabel(xlabel, fontsize=xlabel_size)
     plt.ylabel(ylabel, fontsize=ylabel_size)
@@ -844,10 +1018,19 @@ def plot_minima_volume_vs_data_level(
     if log_scale:
         plt.xscale("log")
         
+    # Add suptitle first (larger)
+    if suptitle:
+        plt.suptitle(suptitle, fontsize=suptitle_size, y=1.01)  
+
+    # Then add smaller title to the axis
     plt.title(title, fontsize=title_size)
     plt.grid(True)
-    plt.legend(title=legend_title, fontsize=10)
-
+    if show_legend:
+        plt.legend(
+            title=legend_title, 
+            fontsize=legend_size,           # Controls label font size
+            title_fontsize=title_size       # Controls title font size specifically
+        )
     if xlim is not None:
         plt.xlim(xlim)
     if ylim is not None:
@@ -867,3 +1050,4 @@ def plot_minima_volume_vs_data_level(
     if show_plot:
         plt.show()
     plt.close()
+    return found_minima_vol, found_minima_dataset

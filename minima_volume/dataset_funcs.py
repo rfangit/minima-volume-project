@@ -490,7 +490,9 @@ def save_dataset(folder="results/", filename="dataset.pt",
 
 def save_model(folder="results/", filename="model.pt", model=None, train_loss=None, 
                train_accs=None, test_loss=None, test_accs=None, 
-               additional_data=None, dataset_type=None):
+               additional_data=None, dataset_type=None,
+               **kwargs  # ✅ Allow arbitrary extra keys 
+              ):
     """
     Save a model with complete training metadata.
     """
@@ -508,7 +510,9 @@ def save_model(folder="results/", filename="model.pt", model=None, train_loss=No
         "dataset_type": dataset_type,
         "model_class": model.__class__.__name__  # Save model class name for reference
     }
-
+    # ✅ Merge in additional keys
+    model_dict.update(kwargs)
+    
     torch.save(model_dict, save_path)
     print(f"✅ Model saved to {save_path}")
 
@@ -518,7 +522,7 @@ def load_model(model, folder="results/models", filename="model.pt", device="cpu"
 
     Args:
         model: an instance of your model class (already initialized)
-        folder: directory where the model file is saved
+        folder: directory where the model file is saved. This file contains model + metadata
         filename: model filename
         device: torch device ("cpu" or "cuda")
     
@@ -532,16 +536,19 @@ def load_model(model, folder="results/models", filename="model.pt", device="cpu"
     model.load_state_dict(model_dict["state_dict"])
     model.to(device)
 
-    # Return all metadata in a dictionary
-    model_data = {
-        "train_loss": model_dict.get("train_loss", None),
-        "train_accs": model_dict.get("train_accs", None),
-        "test_loss": model_dict.get("test_loss", None),
-        "test_accs": model_dict.get("test_accs", None),
-        "additional_data": model_dict.get("additional_data", None),
-        "dataset_type": model_dict.get("dataset_type", None),
-        "model_class": model_dict.get("model_class", None)
-    }
+    # Return everything except the state_dict as metadata
+    model_data = {k: v for k, v in model_dict.items() if k != "state_dict"}
+
+    # Example
+    #model_data = {
+    #    "train_loss": model_dict.get("train_loss", None),
+    #    "train_accs": model_dict.get("train_accs", None),
+    #    "test_loss": model_dict.get("test_loss", None),
+    #    "test_accs": model_dict.get("test_accs", None),
+    #    "additional_data": model_dict.get("additional_data", None),
+    #    "dataset_type": model_dict.get("dataset_type", None),
+    #    "model_class": model_dict.get("model_class", None)
+    #}
 
     print(f"✅ Model loaded into provided instance from {load_path}")
     return model, model_data

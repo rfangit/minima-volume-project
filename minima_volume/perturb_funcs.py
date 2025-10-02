@@ -204,122 +204,6 @@ def move_perturbation_dict(perturbation_dict, device='cpu'):
     
     return moved_dict
 
-def wiggle(model, model_perturber, points, labels, loss_fn, perturbation_dict, coefficients):
-    """
-    Performs a 1D sweep through perturbation space, tracking endpoint losses and accuracies.
-    
-    Args:
-        model: Trained PyTorch model to analyze
-        points: Input tensor (shape [N, D]) 
-        labels: Target labels tensor (shape [N])
-        loss_fn: Differentiable loss function
-        perturbation_dict: Dictionary {param_name: tensor} that describes the perturbation. Must be already normalized (filter or unit)
-        coefficients: coefficients to evaluate
-        
-    Returns:
-        Dictionary containing:
-        - 'loss': array of losses for each perturbation
-        - 'coefficients': array of coefficients used (same as input)
-        - 'accuracies': array of accuracies for each perturbation
-    """
-    device = points.device
-    loss_tensor = torch.zeros(len(coefficients), device=device)
-    
-    previous_coeff = 0.0  # Track the current perturbation coefficient
-    
-    with torch.no_grad():
-        for i, coeff in enumerate(coefficients):
-            # Calculate the incremental change needed
-            delta_coeff = coeff - previous_coeff
-            
-            if delta_coeff != 0:  # Only apply if there's a change
-                incremental_perturbations = {
-                    name: perturbations[name] * delta_coeff
-                    for name in perturbations
-                }
-                model_perturber.apply_perturbation(incremental_perturbations)
-                previous_coeff = coeff  # Update the tracked coefficient
-
-            logits = model(points)
-            
-            # Compute loss
-            loss_tensor[i] = loss_fn(logits.squeeze(), labels.float())
-
-        # Reset only once at the end
-        model_perturber.reset()
-
-    loss = loss_tensor.cpu().numpy()
-    
-    return {
-        'loss': loss,
-        'coefficients': coefficients,
-    }
-    
-def wiggle_accuracy(model, model_perturber, points, labels, loss_fn, perturbation_dict, coefficients):
-    """
-    Performs a 1D sweep through perturbation space, tracking endpoint losses and accuracies.
-    
-    Args:
-        model: Trained PyTorch model to analyze
-        points: Input tensor (shape [N, D]) 
-        labels: Target labels tensor (shape [N])
-        loss_fn: Differentiable loss function
-        perturbation_dict: Dictionary {param_name: tensor} that describes the perturbation. Must be already normalized (filter or unit)
-        coefficients: coefficients to evaluate
-        
-    Returns:
-        Dictionary containing:
-        - 'loss': array of losses for each perturbation
-        - 'coefficients': array of coefficients used (same as input)
-        - 'accuracies': array of accuracies for each perturbation
-    """
-    device = points.device
-    loss_tensor = torch.zeros(len(coefficients), device=device)
-    accuracies_tensor = torch.zeros(len(coefficients), device=device)
-    
-    previous_coeff = 0.0  # Track the current perturbation coefficient
-    
-    with torch.no_grad():
-        for i, coeff in enumerate(coefficients):
-            # Calculate the incremental change needed
-            delta_coeff = coeff - previous_coeff
-            
-            incremental_perturbations = {
-                name: perturbation_dict[name] * delta_coeff
-                for name in perturbation_dict
-            }
-            model_perturber.apply_perturbation(incremental_perturbations)
-            previous_coeff = coeff  # Update the tracked coefficient
-
-            logits = model(points)
-            
-            # Compute loss
-            #loss = loss_fn(logits.squeeze(), labels.float())
-            loss_tensor[i] = loss_fn(logits.squeeze(), labels.float())
-            
-            # Compute accuracy
-            if logits.dim() > 1 and logits.size(1) > 1:
-                # Multi-class
-                preds = logits.argmax(dim=1).to(logits.device)
-            else:
-                # Binary
-                preds = (torch.sigmoid(logits.squeeze()) > 0.5).float()
-
-            #correct = (preds == labels).sum().item()
-            accuracies_tensor[i] = (preds == labels).sum()/len(points)
-        
-        # Reset only once at the end
-        model_perturber.reset()
-
-    loss = loss_tensor.cpu().numpy()
-    accuracies = accuracies_tensor.cpu().numpy()
-    
-    return {
-        'loss': loss,
-        'coefficients': coefficients,
-        'accuracies': accuracies
-    }
-
 def wiggle_evaluator(
     model,
     model_perturber,
@@ -694,6 +578,248 @@ def analyze_wiggles_metrics_large(
 
                 del model
                 torch.cuda.empty_cache()
+
+##############################################
+# Fixed dataset, alternative variation
+##############################################
+
+def analyze_wiggle_metrics_fixed_dataset(
+    model_list, 
+    x_input, y_input,
+    x_test, y_test, 
+    dataset_type,
+    variation_metric_key,
+    metrics,       
+    coefficients,
+    num_directions=3000,
+    perturbation_seed=0,
+    device=None,
+    batch_size=None 
+):
+    # Analyzes volume for models, with a fixed dataset
+    # supports flexible keys, eg, batch size or train epochs
+    if device is None:
+        device = x_base_train.device
+    x_train, y_train = x_input.to(device), y_input.to(device)
+    x_test, y_test = x_test.to(device), y_test.to(device)
+
+    # Precompute perturbations
+    test_model = model_list[0]['model'].to(device)
+    seed_list = [perturbation_seed + i for i in range(num_directions)]
+
+    # Preallocate
+    random_perturbs = [None] * num_directions
+    random_perturb_norms = [None] * num_directions
+    
+    # Enumerate over seeds
+    for idx, seed in enumerate(seed_list):
+        random_perturb = generate_random_perturbation(
+            test_model, 
+            perturb_list=['weight', 'bias'], 
+            seed=seed
+        )
+        random_perturb_norm = perturbation_norm(random_perturb)
+        random_perturbs[idx] = random_perturb
+        random_perturb_norms[idx] = random_perturb_norm
+
+    num_params = sum(t.numel() for t in random_perturbs[0].values())
+    print("The number of parameters of the perturbation is", num_params)
+
+    # Loop through dataset sizes
+    output_dir = f"{dataset_type}_0"
+
+    print(f"Testing on dataset size {len(x_input)} - {num_directions} directions")
+
+    for model_data in model_list:
+        model_trained_data = model_data[variation_metric_key]
+        print(f"Testing model {str(variation_metric_key)} {model_trained_data}")
+        test_performance = {}
+        for metric_name in metrics.keys():
+            test_key = f"test_{metric_name}"
+            test_performance[metric_name] = model_data[test_key][-1]
+            
+            # Print test performance
+            for metric_name, value in test_performance.items():
+                if value is not None:
+                    print(f"{metric_name.capitalize()}: {value:.4f}")
+                else:
+                    print(f"{metric_name.capitalize()}: N/A")
+
+            model = model_data['model'].to(device)
+            norm_dict = filtnorm(list(model.named_parameters()))
+            perturber = ModelPerturber(model)
+
+            start_time = time.time()
+            all_results = []
+
+            for idx, (seed, perturb, perturb_norm) in enumerate(zip(seed_list, random_perturbs, random_perturb_norms)):
+                filt_norm_perturb_vectors = filternorm_perturbation_vectors(perturb, norm_dict) 
+                wiggle_result = wiggle_evaluator(
+                    model=model,
+                    model_perturber=perturber,
+                    points=x_train,
+                    labels=y_train,
+                    metrics=metrics, 
+                    perturbation_dict=filt_norm_perturb_vectors,
+                    coefficients=coefficients,
+                    batch_size=batch_size,
+                )
+                
+                wiggle_result.update({
+                    'coefficients': coefficients,
+                    'perturbation_seed': seed,
+                    'perturbation_norm': float(perturb_norm.item()),
+                })
+                all_results.append(wiggle_result)
+
+            elapsed_time = time.time() - start_time
+            print(f"Wiggle completed in {elapsed_time:.2f} seconds "
+                  f"for {dataset_type} model trained with {model_trained_data} samples")
+
+            # For save perturbations, we need 
+            # 'wiggle_results'
+            # 'model
+            # rest are optional kwargs
+            save_perturbations(
+                wiggle_results=all_results, 
+                model=model, 
+                output_dir=output_dir,
+                filename=f"{dataset_type}_{model_trained_data}.npz",
+                additional_data=0, #placeholder
+                model_trained_data=model_trained_data,  # the integer that denotes the model variation value
+                dataset_type=dataset_type,  # string, data/noise/poison
+                base_dataset_size=len(x_train),  # integer
+                **{f"test_{key}": value for key, value in test_performance.items()},
+                num_params=num_params  # integer
+            )
+            print(f"Saved to {output_dir}\n")
+
+##############################################
+# No Filter Normalization
+##############################################
+
+def analyze_wiggle_metrics_no_filternorm(
+    model_list, 
+    x_base_train, y_base_train, 
+    x_additional, y_additional,
+    x_test, y_test, 
+    dataset_quantities, 
+    dataset_type, 
+    metrics,       
+    coefficients,
+    num_directions=3000,
+    perturbation_seed=0,
+    base_output_dir="tests/", 
+    device=None,
+    batch_size=None 
+):
+    if device is None:
+        device = x_base_train.device
+    x_base_train, y_base_train = x_base_train.to(device), y_base_train.to(device)
+    x_additional, y_additional = x_additional.to(device), y_additional.to(device)
+    x_test, y_test = x_test.to(device), y_test.to(device)
+
+    # Precompute perturbations
+    test_model = model_list[0]['model'].to(device)
+    seed_list = [perturbation_seed + i for i in range(num_directions)]
+
+    # Preallocate
+    random_perturbs = [None] * num_directions
+    random_perturb_norms = [None] * num_directions
+    
+    # Enumerate over seeds
+    for idx, seed in enumerate(seed_list):
+        random_perturb = generate_random_perturbation(
+            test_model, 
+            perturb_list=['weight', 'bias'], 
+            seed=seed
+        )
+        random_perturb_norm = perturbation_norm(random_perturb)
+        random_perturbs[idx] = random_perturb
+        random_perturb_norms[idx] = random_perturb_norm
+
+    num_params = sum(t.numel() for t in random_perturbs[0].values())
+    print("The number of parameters of the perturbation is", num_params)
+
+    # Loop through dataset sizes
+    for additional_data in dataset_quantities:
+        # Create output directory for this dataset
+        if base_output_dir:
+            output_dir = f"{base_output_dir}/{dataset_type}_{additional_data}"
+        else:
+            output_dir = f"{dataset_type}_{additional_data}"
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        x_train = torch.cat([x_base_train, x_additional[:additional_data]], dim=0)
+        y_train = torch.cat([y_base_train, y_additional[:additional_data]], dim=0)
+        print(f"Testing on {dataset_type} with {additional_data} samples - {num_directions} directions")
+
+        for model_data in model_list:
+            model_trained_data = model_data['additional_data']
+            print(f"Testing model trained on {model_trained_data} additional data.")
+            if model_trained_data >= additional_data:
+                # Retrieve test performance for all metrics dynamically
+                test_performance = {}
+                for metric_name in metrics.keys():
+                    test_key = f"test_{metric_name}"
+                    #print (test_key)
+                    #print (model_data[test_key][0:5])
+                    if test_key in model_data:
+                        test_performance[metric_name] = model_data[test_key][-1]
+                    else:
+                        test_performance[metric_name] = None  # or skip if you prefer
+                
+                # Print test performance
+                for metric_name, value in test_performance.items():
+                    if value is not None:
+                        print(f"{metric_name.capitalize()}: {value:.4f}")
+                    else:
+                        print(f"{metric_name.capitalize()}: N/A")
+
+                model = model_data['model'].to(device)
+                #norm_dict = filtnorm(list(model.named_parameters())) # NOT NEEDED
+                perturber = ModelPerturber(model)
+
+                start_time = time.time()
+                all_results = []
+
+                for idx, (seed, perturb, perturb_norm) in enumerate(zip(seed_list, random_perturbs, random_perturb_norms)):
+                    # filt_norm_perturb_vectors = filternorm_perturbation_vectors(perturb, norm_dict) # NOT NEEDED
+                    wiggle_result = wiggle_evaluator(
+                        model=model,
+                        model_perturber=perturber,
+                        points=x_train,
+                        labels=y_train,
+                        metrics=metrics, 
+                        perturbation_dict=perturb,
+                        coefficients=coefficients,
+                        batch_size=batch_size,
+                    )
+                    
+                    wiggle_result.update({
+                        'coefficients': coefficients,
+                        'perturbation_seed': seed,
+                        'perturbation_norm': float(perturb_norm.item()),
+                    })
+                    all_results.append(wiggle_result)
+
+                elapsed_time = time.time() - start_time
+                print(f"Wiggle completed in {elapsed_time:.2f} seconds "
+                      f"for {dataset_type} model trained with {model_trained_data} samples")
+
+                save_perturbations(
+                    wiggle_results=all_results, 
+                    model=model, 
+                    output_dir=output_dir,
+                    filename=f"{dataset_type}_{model_trained_data}.npz",
+                    additional_data=additional_data,  # integer for the amount used in this landscape
+                    model_trained_data=model_trained_data,  # the integer for the amount of additional data trained on
+                    dataset_type=dataset_type,  # string, data/noise/poison
+                    base_dataset_size=len(x_base_train),  # integer
+                    **{f"test_{key}": value for key, value in test_performance.items()},
+                    num_params=num_params  # integer
+                )
+                print(f"Saved to {output_dir}\n")
 
 ##############################################
 # Functions related to perturbations
