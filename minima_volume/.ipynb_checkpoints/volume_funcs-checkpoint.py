@@ -661,6 +661,7 @@ def plot_metric_distributions(categories: list,
                             metric_values: list, 
                             category_name: str = "Category",
                             metric_name: str = "Metric",
+                            base_shift: int = 0,
                             title: str = "Metric Distributions by Category",
                             save_path: str = None,
                             display: bool = True) -> None:
@@ -734,7 +735,7 @@ def plot_metric_distributions(categories: list,
         ax.axvspan(q1, q3, color='gray', alpha=0.2, label='Interquartile Range')
         
         # Format subplot
-        ax.set_title(f'{category_name} {category} (n={len(values)})', pad=10)
+        ax.set_title(f'{category_name} {category + base_shift} (n={len(values)})', pad=10)
         ax.set_ylabel('Density')
         ax.grid(True, alpha=0.3)
         ax.legend()
@@ -889,6 +890,8 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
     model_key = list(data_dictionary.keys())[0]
     num_params = data_dictionary[model_key]['num_params']
     loss_landscape_data_param = data_dictionary[model_key]['additional_data']
+    base_dataset_size = data_dictionary[model_key]['base_dataset_size']
+    print ("The size of the base dataset is ", base_dataset_size)
 
     # Acquire type
     dataset_type = data_dictionary[model_key]['dataset_type']
@@ -999,6 +1002,7 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
         metric_values=radii_list,
         category_name=additional_param_level,
         metric_name="Perturbation Radius",
+        base_shift = base_dataset_size,
         title="Radius Distributions by "+additional_param_level,
         save_path=save_paths_dict["radius_histogram_loss"],
         display=display_options['loss_plots']

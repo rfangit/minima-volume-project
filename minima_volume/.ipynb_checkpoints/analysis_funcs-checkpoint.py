@@ -226,6 +226,25 @@ def list_additional_data(experiment_folder: str):
 
     return additional_data_values
 
+def save_results_dict_npz(results_dict, filepath):
+    """
+    Save results_dict into a compressed .npz file.
+    """
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    # Save using object array with pickle
+    np.savez_compressed(filepath, results_dict=results_dict)
+    print(f"results_dict saved to {filepath}")
+
+
+def load_results_dict_npz(filepath):
+    """
+    Load results_dict from a compressed .npz file.
+    """
+    data = np.load(filepath, allow_pickle=True)
+    results_dict = data["results_dict"].item()  # unpack object
+    print(f"results_dict loaded from {filepath}")
+    return results_dict
+
 # ============================================================
 # SECTION 2: RANKING UTILITIES
 # ============================================================
@@ -536,6 +555,7 @@ def plot_fixed_landscape_minima_pair(
     show_average_spread_label = True,
     # Special plotting parameters:
     background_colors=None,         # list of colors for per-run lines (len = len(all_x))
+    natural_minima_loc = "first",
     natural_label=None,             # legend label for "natural" minima (first point)
     other_label=None,               # legend label for all other points
     natural_marker="o",             # marker style for natural minima
@@ -574,7 +594,7 @@ def plot_fixed_landscape_minima_pair(
     xlabel_plot = "Ranked " + xlabel if ranking else xlabel
     ylabel_plot = "Ranked " + ylabel if ranking else ylabel
 
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(6, 5), constrained_layout=True)
 
     processed_x, processed_y = [], []
 
@@ -637,70 +657,61 @@ def plot_fixed_landscape_minima_pair(
                      label=label_center)
             plt.fill_between(x_ref, y_low, y_high, color=color, alpha=0.2,
                              label=label_spread if show_average_spread_label else None)
-    
+            
         elif average_style == "errorbar":
             # --- Step 1: plot the connecting line first ---
-            plt.plot(x_ref, center_y, color=(0, 0, 0), linewidth=2, linestyle="-", alpha = 0.9)
-    
+            plt.plot(x_ref, center_y, color=(0, 0, 0), linewidth=2, linestyle="-", alpha=0.9)
+        
             # --- Step 2: prepare errors and masks ---
             xerr = np.vstack([x_ref - x_low, x_high - x_ref]) if plot_x_error else None
             yerr = np.vstack([center_y - y_low, y_high - center_y])
-    
-            smallest_idx = np.argmin(x_ref)
-            mask_first = np.zeros_like(x_ref, dtype=bool)
-            mask_first[smallest_idx] = True
-            mask_rest = ~mask_first
-
-            # --- Step 3: plot first point separately ---
-            if natural_label is not None:
-                plt.errorbar(
-                    x_ref[mask_first], center_y[mask_first],
-                    xerr=xerr[:, mask_first] if xerr is not None else None,
-                    yerr=yerr[:, mask_first],
-                    fmt=natural_marker, linestyle="none",
-                    markersize=13,
-                    mfc='red',       # marker fill
-                    mec='black',     # marker edge
-                    mew=1.5,           # edge width
-                    ecolor='black',  # error bar color
-                    elinewidth=2,    # error bar thickness
-                    capsize=4,       # cap size
-                    capthick=2,      # cap thickness
-                    zorder=5,
-                    label=natural_label
-                )
+        
+            # --- Step 3: determine natural point location ---
+            # user specifies: natural_miima_loc = "first" or "last"
+            if natural_minima_loc == "first":
+                natural_idx = np.argmin(x_ref)
+            elif natural_minima_loc == "last":
+                natural_idx = np.argmax(x_ref)
             else:
-                plt.errorbar(
-                    x_ref[mask_first], center_y[mask_first],
-                    xerr=xerr[:, mask_first] if xerr is not None else None,
-                    yerr=yerr[:, mask_first],
-                    fmt=natural_marker, linestyle="none",
-                    markersize=13,
-                    mfc='red',
-                    mec='black',
-                    mew=1.5,
-                    ecolor='black',
-                    elinewidth=2,
-                    capsize=4,
-                    capthick=2,
-                    zorder=5,
-                    label=(f"{label_center} ± {label_spread}" if show_average_spread_label else None)
-                )
-            
-            # --- Plot remaining points ---
+                raise ValueError("natural_miima_loc must be 'first' or 'last'")
+        
+            mask_natural = np.zeros_like(x_ref, dtype=bool)
+            mask_natural[natural_idx] = True
+            mask_rest = ~mask_natural
+        
+            # --- Step 4: plot natural (highlighted) point ---
+            plt.errorbar(
+                x_ref[mask_natural], center_y[mask_natural],
+                xerr=xerr[:, mask_natural] if xerr is not None else None,
+                yerr=yerr[:, mask_natural],
+                fmt=natural_marker, linestyle="none",
+                markersize=13,
+                mfc='red',       # marker fill
+                mec='black',     # marker edge
+                mew=1.5,
+                ecolor='black',  # error bar color
+                elinewidth=2,
+                capsize=4,
+                capthick=2,
+                zorder=5,
+                label=(natural_label if natural_label is not None 
+                       else (f"{label_center} ± {label_spread}" if show_average_spread_label else None))
+            )
+        
+            # --- Step 5: plot remaining points ---
             plt.errorbar(
                 x_ref[mask_rest], center_y[mask_rest],
                 xerr=xerr[:, mask_rest] if xerr is not None else None,
                 yerr=yerr[:, mask_rest],
-                fmt=other_marker, linestyle="none", 
+                fmt=other_marker, linestyle="none",
                 markersize=10,
-                mfc='red',       # red fill
-                mec='black',     # black border
+                mfc='red',
+                mec='black',
                 mew=1.5,
-                ecolor='black',  # error bars black
-                elinewidth=2,    # thicker error bar
-                capsize=4,       # caps larger
-                capthick=2,      # thicker caps
+                ecolor='black',
+                elinewidth=2,
+                capsize=4,
+                capthick=2,
                 zorder=4,
                 label=(other_label if other_label is not None else None)
             )
