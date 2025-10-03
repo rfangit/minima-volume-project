@@ -41,26 +41,27 @@ Each **experiment folder** follows the same structure:
 - This setup is somewhat ad-hoc but enables quick iteration and scaling.
 
 ### 2. Base Folder
-The **base** folder contains the **important notebooks** for the experiment.  
+The **base** folder contains the **important notebooks** for running and analyzing experiments.  
 These represent the core experimental loop:
 
-- **Training models with different data levels**  
+- **Train Low Test Models.ipynb**  
   - Imports models and datasets from `minima_volume`.  
   - Trains models with varying dataset sizes.  
   - Saves trained models alongside the dataset used.  
 
-- **Random perturbations**  
+- **Random Perturbs.ipynb**  
   - Applies fixed random perturbations to model parameters.  
   - Evaluates loss changes along those directions.  
   - Purely random directions — no binary search or optimization.  
 
-- **Loss threshold evaluation**  
+- **Volume Cutoff.ipynb**  
   - Evaluates trained models on the dataset.  
-  - Determines when loss grows too large (usually right after unseen data).  
+  - Determines when loss grows too large (often after encountering unseen data).  
 
-- **Volume estimation**  
+- **Volume Estimation Pipeline.ipynb**  
   - Uses perturbation results to estimate when perturbations cross a cutoff.  
-  - Collects radii and estimates approximate minima volumes.  
+  - Collects radii and computes approximate minima volumes.  
+
 
 ### Running New Experiments
 To run a new experiment:  
