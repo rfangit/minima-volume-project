@@ -37,35 +37,35 @@ The core logic lives in the `minima_volume` package, while experiment-specific c
 
 Each **experiment folder** follows the same structure:
 
-### 1️⃣ Template Folder
+### Template Folder
 - Contains Jupyter notebooks that serve as **experiment templates**.  
 - These allow you to:
-  - 📑 Copy and duplicate notebooks for new runs.  
-  - 🔄 Swap hyperparameters and parameters.  
-  - 🏃 Launch multiple experiments in sequence.  
+  - Copy and duplicate notebooks for new runs.  
+  - Swap hyperparameters and parameters.  
+  - Launch multiple experiments in sequence.  
 
-👉 This setup is somewhat ad-hoc but enables quick iteration and scaling.
+This setup is somewhat ad-hoc but enables quick iteration and scaling.
 
 ---
 
-### 2️⃣ Base Folder
+### Base Folder
 The **base** folder contains the **important notebooks** for the experimental loop:
 
-- **📘 Train Low Test Models.ipynb**  
+- **Train Low Test Models.ipynb**  
   - Imports models and datasets from `minima_volume`.  
   - Trains models with varying dataset sizes.  
   - Saves trained models alongside the dataset used.  
 
-- **📘 Random Perturbs.ipynb**  
+- **Random Perturbs.ipynb**  
   - Applies fixed random perturbations to model parameters.  
   - Evaluates loss changes along those directions.  
   - Purely random directions — no binary search or optimization.  
 
-- **📘 Volume Cutoff.ipynb**  
+- **Volume Cutoff.ipynb**  
   - Evaluates trained models on the dataset.  
   - Determines when loss grows too large (often after encountering unseen data).  
 
-- **📘 Volume Estimation Pipeline.ipynb**  
+- **Volume Estimation Pipeline.ipynb**  
   - Uses perturbation results to estimate when perturbations cross a cutoff.  
   - Collects radii and computes approximate minima volumes.  
 
@@ -82,10 +82,10 @@ To run a new experiment:
      - `Volume Cutoff.ipynb`  
    - Pass in the dataset to `Train Low Test Models.ipynb`.  
 3. **Run in sequence:**  
-   - 🟢 Training →  
-   - 🔵 Perturbations →  
-   - 🟡 Cutoff evaluation →  
-   - 🟣 Volume estimation  
+   - Training →  
+   - Perturbations →  
+   - Cutoff evaluation →  
+   - Volume estimation  
 4. Results (models, perturbations, radii, figures) will be saved in the respective experiment folder.  
 
 ---
@@ -129,7 +129,7 @@ To run a new experiment:
 
 ---
 
-## 🖼 Figures & 🎥 Videos
+## 🖼 Figures & Videos
 
 - All **figures** are in [`figs/`](figs/) for use in the paper.  
 - **Videos** can be generated via scripts in [`videos/`](videos/).  
@@ -138,9 +138,9 @@ To run a new experiment:
 
 ## 📝 Notes
 
-- 🕰 Some outdated code stored **models/datasets directly inside experiment folders**.  
+- Some outdated code stored **models/datasets directly inside experiment folders**.  
   - These have been updated to import from `minima_volume`.  
-- 🎲 Random seeds are logged for reproducibility.  
+- Random seeds are logged for reproducibility.  
 
 ---
 
