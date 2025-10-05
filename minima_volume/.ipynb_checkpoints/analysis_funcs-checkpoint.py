@@ -862,6 +862,119 @@ def plot_perturb_probs(
         plt.show()
     plt.close()
         
+def plot_individual_traces(minima_results, minima_trained_on_additional_data_level, base_shift, color, alpha, sort_x):
+    """
+    Plot volumes for minima trained with a given amount of additional data.
+
+    Args:
+        minima_results (list[dict]): Each entry represents one minima and contains:
+            {
+                "data_levels": list[int|float],  # Data levels used when probing the minima
+                "log_exp": list[float],          # Corresponding log(volume) values
+            }
+
+        minima_trained_on_additional_data_level (int|float):
+            The amount of *additional data* used when this minima was originally trained.
+            (Used for highlighting its "own" training point in the plot.)
+
+        base_shift (int):
+            Constant shift applied to x-values, used when converting relative data levels
+            to absolute dataset sizes (e.g., when base_train_size is nonzero).
+        color (tuple):
+        alpha (float):
+        sort_x (bool):
+    Returns:
+        tuple[list[np.ndarray], list[np.ndarray]]:
+            all_x, all_y — Lists containing x and y arrays for every minima trace.
+    """
+    all_x, all_y = [], []
+
+    # Ensure all traces have consistent length (shortest minima determines)
+    min_len = min(len(m["log_exp"]) for m in minima_results)
+    print(f"Plotting minima trained with {minima_trained_on_additional_data_level} additional data points")
+
+    for minima in minima_results:
+        x_vals = [x + base_shift for x in minima["data_levels"][:min_len]]
+        y_vals = minima["log_exp"][:min_len]
+
+        # Sort by x for consistent plotting
+        if sort_x:
+            x_vals, y_vals = zip(*sorted(zip(x_vals, y_vals), key=lambda p: p[0]))
+
+        # Plot the trace
+        plt.plot(x_vals, y_vals, marker="o", color=color, alpha=alpha)
+        all_x.append(x_vals)
+        all_y.append(y_vals)
+
+        # Highlight the point corresponding to the minima’s own training data level
+        training_point = minima_trained_on_additional_data_level + base_shift
+        if training_point in x_vals:
+            idx = x_vals.index(training_point)
+            plt.scatter(
+                training_point, y_vals[idx],
+                color=color,
+                s=50,
+                alpha=alpha,
+                zorder=3
+            )
+
+    return all_x, all_y
+
+
+def plot_average_curve(minima_results, minima_trained_on_additional_data_level, base_shift, color, sort_x, central_tendency):
+    """
+    Plot the average (mean or median) curve across all minima trained with a certain data level.
+
+    Args:
+        minima_results (list[dict]):
+            List of minima result dictionaries, each containing:
+                {
+                    "data_levels": list[int|float],
+                    "log_exp": list[float],
+                }
+
+        minima_trained_on_additional_data_level (int|float):
+            Amount of additional data used to train this group of minima.
+            (Used for highlighting the training-level point.)
+
+        base_shift (int):
+        color (tuple):
+        sort_x (bool):
+        central_tendency (str): Either "mean" or "median" — determines which statistic to plot as the central line.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]:
+            data_levels, center_y — the x and y coordinates of the averaged curve.
+    """
+    # Truncate all traces to match the shortest one
+    min_len = min(len(m["log_exp"]) for m in minima_results)
+    log_exp_matrix = np.array([m["log_exp"][:min_len] for m in minima_results])
+    data_levels = np.array([x + base_shift for x in minima_results[0]["data_levels"][:min_len]])
+
+    # Compute central tendency and spread
+    if central_tendency == "median":
+        center_y = np.median(log_exp_matrix, axis=0)
+        y_low = np.percentile(log_exp_matrix, 25, axis=0)
+        y_high = np.percentile(log_exp_matrix, 75, axis=0)
+    else:
+        center_y = np.mean(log_exp_matrix, axis=0)
+        y_std = np.std(log_exp_matrix, axis=0)
+        y_low = center_y - y_std
+        y_high = center_y + y_std
+
+    # Optional sorting
+    if sort_x:
+        data_levels, center_y, y_low, y_high = map(np.array, zip(*sorted(
+            zip(data_levels, center_y, y_low, y_high),
+            key=lambda p: p[0]
+        )))
+
+    # Plot mean/median line and shaded area
+    plt.plot(data_levels, center_y, color=color, linewidth=2.5)
+    plt.fill_between(data_levels, y_low, y_high, color=color, alpha=0.2)
+
+    return data_levels, center_y
+
 def plot_minima_volume_vs_data_level(
     results_dict,
     xlabel="Loss Landscape Data Level",
@@ -875,43 +988,53 @@ def plot_minima_volume_vs_data_level(
     sort_x=False,
     plot_average=False,
     plot_only_average=False,
-    show_plot = True,
-    central_tendency="mean", 
+    show_plot=True,
+    central_tendency="mean",
     xlabel_size=12, ylabel_size=12, title_size=14, suptitle_size=18,
-    legend_size=12, legend_title_fontsize = 12, legend_loc = "best",
+    legend_size=12, legend_title_fontsize=12, legend_loc="best",
     show_legend=True,
-    data_type=None,              
-    base_train_size=None,         
-    xlim=None,                  
-    ylim=None,        
-    yticks=None,  
+    data_type=None,
+    base_train_size=None,
+    xlim=None,
+    ylim=None,
+    yticks=None,
 ):
     """
-    Plot how minima volumes change as the data level changes, with large faded dots
-    marking the model's own training data level. Optionally plots the average ± std.
+    Plot the minima volumes (log volume) versus the data level they were evaluated on.
 
-    Args:
-        results_dict (dict): {target_model_data_level: experiment_results_list}.
-                             Each experiment_results_list contains dicts with:
-                                 - "data_levels" (list of int/float)
-                                 - "log_exp" (list of float)
-        xlabel, ylabel, title: Plot labels and title.
-        alpha (float): Transparency of individual lines/points.
-        output_dir (str): Directory to save plot.
-        filename (str): Base filename (without extension).
-        sort_x (bool): Whether to sort each (x, y) curve by x before plotting.
-        plot_average (bool): If True, show average ± std shading across runs.
-        plot_only_average (bool): If True, skip plotting individual runs.
-        data_type (str|None): If provided, controls legend formatting:
-                              - "data" → Dataset Size {target + base_train}
-                              - "poison"/"noise" → Incorrect Points: {target}
-                              If None → fallback to old behaviour.
-        base_train_size (int|None): Needed for "data" type to shift dataset sizes.
-    Returns:
-        found_minima_vol (list): List of the naturally found minima volumes in their natural dataset
-        found_minima_dataset (list): List of datasets where the above minima were found
+    -------------------------------------------------------------------------------
+    Expected Format of `results_dict`:
+    -------------------------------------------------------------------------------
+    `results_dict` is a dictionary where:
+        - **Keys** are the additional data levels used to train each minima.
+          Example: 0, 50, 100, ... (number of extra training examples used for minima).
+
+        - **Values** are lists of experiment results, where each experiment result
+          is itself a dictionary representing one minima. Each minima dictionary has:
+              {
+                  "experiment": "model_0_data_10",       # Name or identifier of the minima
+                  "log_exp": [923312.2196997597, 0],     # List of log(exp(r/n)) values for each data level, last is usually 0
+                  "test_loss": [2.2788678636550905],     # List of test loss values (not always used here)
+                  "data_levels": [0, 62]                 # Data levels where this minima was evaluated, last is where it exceeds threshold
+              }
+
+    For example:
+        results_dict[0] → list of 10 minima trained on *0 additional data*.
+        Each minima entry shows how its volume/log_exp changes across data_levels.
+
+    -------------------------------------------------------------------------------
+    How the function works:
+    -------------------------------------------------------------------------------
+    1. For each `minima_trained_on_additional_data_level` (the dict key),
+       it gathers all corresponding minima results.
+    2. Each minima trace (`log_exp` vs `data_levels`) is plotted individually.
+    3. Optionally, a mean or median curve across all minima is plotted with shading.
+    4. The point corresponding to the minima’s own training level is highlighted.
+    5. The figure is optionally saved and/or displayed.
+    -------------------------------------------------------------------------------
     """
-    # Title logic
+
+    # --- Figure setup ---
     if title is None:
         title = f"{ylabel} vs {xlabel}"
 
@@ -919,129 +1042,90 @@ def plot_minima_volume_vs_data_level(
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
 
-    found_minima_vol = []
-    found_minima_dataset = []
+    found_minima_vol, found_minima_dataset = [], []
 
-    # Legend title depends on whether data_type is given
-    if data_type is None:
-        legend_title = "Target Model Data Level"
-    else:
-        legend_title = "Trained on:"
+    # Legend title depends on whether we're plotting data experiments
+    legend_title = "Trained on:" if data_type else "Minima Trained on Data Level"
+    base_shift = base_train_size if data_type == "data" else 0
 
-    base_shift = 0
-    if data_type == "data":
-        base_shift = base_train_size # shifting to plot the true dataset size for data augmentations
-    
-    for target_level, exp_results in results_dict.items():
-        color = level_to_color[target_level]
+    # --- Iterate over all minima training levels ---
+    for minima_trained_on_additional_data_level, exp_results in results_dict.items():
+        color = level_to_color[minima_trained_on_additional_data_level]
 
-        # --- Ensure consistent lengths across experiments ---
-        min_len = min(len(exp_data["log_exp"]) for exp_data in exp_results)
-        log_exp_matrix = np.array([
-            exp_data["log_exp"][:min_len] for exp_data in exp_results
-        ])
-        data_levels = [x + base_shift for x in exp_results[0]["data_levels"][:min_len]]
-
-        # Smart Legend Label Formatting
+        # Label for legend
         if data_type is None:
-            label_str = f"Level {target_level}"
+            label_str = f"Level {minima_trained_on_additional_data_level}"
         elif data_type == "data":
             if base_train_size is None:
                 raise ValueError("base_train_size must be provided when data_type='data'")
-            label_str = f"{target_level + base_train_size:,} Examples"
+            label_str = f"{minima_trained_on_additional_data_level + base_train_size:,} Examples"
         elif data_type in {"poison", "noise"}:
-            label_str = f"Incorrect Points: {target_level}"
+            label_str = f"Incorrect Points: {minima_trained_on_additional_data_level}"
         else:
             raise ValueError(f"Unknown data_type: {data_type}")
 
-        # Plot all experiment curves
+        # --- Plot the minima found with this data level. ---
         if not plot_only_average:
-            for exp_data in exp_results:
-                x_vals = [x + base_shift for x in exp_data["data_levels"][:min_len]]
-                y_vals = exp_data["log_exp"][:min_len]
+            plot_individual_traces(
+                exp_results,
+                minima_trained_on_additional_data_level,
+                base_shift,
+                color,
+                alpha,
+                sort_x
+            )
 
-                if sort_x:
-                    pairs = sorted(zip(x_vals, y_vals), key=lambda p: p[0])
-                    x_vals, y_vals = zip(*pairs)
-
-                plt.plot(x_vals, y_vals, marker="o", color=color, alpha=alpha)
-
-                # Large faded dot if target level matches a data_level
-                if target_level + base_shift in x_vals:
-                    idx = x_vals.index(target_level + base_shift)
-                    plt.scatter(
-                        target_level + base_shift, y_vals[idx],
-                        color=color,
-                        s=50,
-                        alpha=alpha,
-                        zorder=3
-                    )
-
-        # Plot average ± shading if requested
+        # --- Plot average ± spread for minima trained on a certain amount of data ---
         if plot_average:
-            if central_tendency == "median":
-                center_y = np.median(log_exp_matrix, axis=0)
-                y_low = np.percentile(log_exp_matrix, 25, axis=0)
-                y_high = np.percentile(log_exp_matrix, 75, axis=0)
-                label_center = "Median"
-                label_spread = "IQR (25–75%)"
-            else:  # mean (default)
-                center_y = np.mean(log_exp_matrix, axis=0)
-                y_std = np.std(log_exp_matrix, axis=0)
-                y_low = center_y - y_std
-                y_high = center_y + y_std
-                label_center = "Mean"
-                label_spread = "1 Std"
-        
-            if sort_x:
-                pairs = sorted(zip(data_levels, center_y, y_low, y_high), key=lambda p: p[0])
-                data_levels, center_y, y_low, y_high = zip(*pairs)
-        
-            plt.plot(
-                data_levels, center_y,
-                color=color, linewidth=2.5, label=label_str
+            data_levels, center_y = plot_average_curve(
+                exp_results,
+                minima_trained_on_additional_data_level,
+                base_shift,
+                color,
+                sort_x,
+                central_tendency
             )
-            plt.fill_between(
-                data_levels, np.array(y_low), np.array(y_high),
-                color=color, alpha=0.2
-            )
-        
-            # Large dot at center curve
-            if target_level + base_shift in data_levels:
-                idx = data_levels.index(target_level + base_shift)
-                plt.scatter(
-                    target_level + base_shift, center_y[idx],
-                    color=color,
-                    s=140,
-                    edgecolors="black",
-                    linewidths=1.0,
-                    alpha=1.0,
-                    zorder=4
-                )
-                found_minima_vol.append(target_level + base_shift)
-                found_minima_dataset.append(center_y[idx])
+
+            plt.plot([], [], color=color, linewidth=2.5, label=label_str)
+
+            # Highlight point corresponding to where minima was trained
+            training_point = minima_trained_on_additional_data_level + base_shift
+            if training_point in data_levels:
+                idx = np.where(data_levels == training_point)[0]
+                if len(idx):
+                    idx = idx[0]
+                    plt.scatter(
+                        training_point,
+                        center_y[idx],
+                        color=color,
+                        s=140,
+                        edgecolors="black",
+                        linewidths=1.0,
+                        zorder=4
+                    )
+                    found_minima_vol.append(training_point)
+                    found_minima_dataset.append(center_y[idx])
         elif plot_only_average:
             plt.plot([], [], color=color, marker="o", linestyle="", label=label_str)
-    
-    # Axis labels and title
+
+    # --- Axis and title formatting ---
     plt.xlabel(xlabel, fontsize=xlabel_size)
     plt.ylabel(ylabel, fontsize=ylabel_size)
-    
     if log_scale:
         plt.xscale("log")
-        
-    # Add suptitle first (larger)
-    if suptitle:
-        plt.suptitle(suptitle, fontsize=suptitle_size, y=1.01)  
 
-    # Then add smaller title to the axis
+    if suptitle:
+        plt.suptitle(suptitle, fontsize=suptitle_size, y=1.01)
     plt.title(title, fontsize=title_size)
     plt.grid(True)
+
+    # --- Legend and bounds ---
     if show_legend:
         plt.legend(
-            title=legend_title, 
-            fontsize=legend_size,           # Controls label font size
-            title_fontsize=title_size       # Controls title font size specifically
+            title=legend_title,
+            fontsize=legend_size,
+            title_fontsize=legend_title_fontsize,
+            loc=legend_loc
         )
 
     if yticks is not None:
@@ -1050,8 +1134,8 @@ def plot_minima_volume_vs_data_level(
         plt.xlim(xlim)
     if ylim is not None:
         plt.ylim(ylim)
-    
-    # Save to file if requested
+
+    # --- Save and show ---
     if output_dir and filename:
         os.makedirs(output_dir, exist_ok=True)
         save_name = filename
@@ -1059,10 +1143,12 @@ def plot_minima_volume_vs_data_level(
             save_name += "_avg"
         if plot_only_average:
             save_name += "_onlyavg"
-        save_name += ".png"
-        save_path = os.path.join(output_dir, save_name)
-        plt.savefig(save_path, bbox_inches="tight")
+        save_path = os.path.join(output_dir, f"{save_name}.png")
+        plt.savefig(save_path)
+
     if show_plot:
         plt.show()
     plt.close()
+
     return found_minima_vol, found_minima_dataset
+
