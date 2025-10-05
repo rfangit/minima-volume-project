@@ -883,7 +883,8 @@ def plot_minima_volume_vs_data_level(
     data_type=None,              
     base_train_size=None,         
     xlim=None,                  
-    ylim=None,                    
+    ylim=None,        
+    yticks=None,  
 ):
     """
     Plot how minima volumes change as the data level changes, with large faded dots
@@ -914,7 +915,7 @@ def plot_minima_volume_vs_data_level(
     if title is None:
         title = f"{ylabel} vs {xlabel}"
 
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(6, 5), constrained_layout=True)
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
 
@@ -1042,6 +1043,9 @@ def plot_minima_volume_vs_data_level(
             fontsize=legend_size,           # Controls label font size
             title_fontsize=title_size       # Controls title font size specifically
         )
+
+    if yticks is not None:
+        plt.yticks(yticks)
     if xlim is not None:
         plt.xlim(xlim)
     if ylim is not None:
@@ -1057,7 +1061,7 @@ def plot_minima_volume_vs_data_level(
             save_name += "_onlyavg"
         save_name += ".png"
         save_path = os.path.join(output_dir, save_name)
-        plt.savefig(save_path, bbox_inches="tight")
+        plt.savefig(save_path)#, bbox_inches="tight")
     if show_plot:
         plt.show()
     plt.close()
