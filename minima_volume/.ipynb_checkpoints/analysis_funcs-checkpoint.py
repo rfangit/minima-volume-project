@@ -560,6 +560,7 @@ def plot_fixed_landscape_minima_pair(
     other_label=None,               # legend label for all other points
     natural_marker="o",             # marker style for natural minima
     other_marker="o",               # marker style for others
+    figsize=None,                   # NEW: optional figure size override
 ):
     """
     General-purpose plotting function for relationships between model data.
@@ -594,8 +595,8 @@ def plot_fixed_landscape_minima_pair(
     xlabel_plot = "Ranked " + xlabel if ranking else xlabel
     ylabel_plot = "Ranked " + ylabel if ranking else ylabel
 
-    plt.figure(figsize=(6, 5), constrained_layout=True)
-
+    plt.figure(figsize=figsize if figsize is not None else (6, 5), constrained_layout=True)
+    
     processed_x, processed_y = [], []
 
     for i, (x_vals, y_vals) in enumerate(zip(all_x, all_y)):
