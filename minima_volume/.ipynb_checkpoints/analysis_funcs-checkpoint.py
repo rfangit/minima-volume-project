@@ -1104,8 +1104,8 @@ def plot_minima_volume_vs_data_level(
                         linewidths=1.0,
                         zorder=4
                     )
-                    found_minima_vol.append(training_point)
-                    found_minima_dataset.append(center_y[idx])
+                    found_minima_dataset.append(training_point)
+                    found_minima_vol.append(center_y[idx])
         elif plot_only_average:
             plt.plot([], [], color=color, marker="o", linestyle="", label=label_str)
 
