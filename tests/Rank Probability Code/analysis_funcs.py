@@ -632,7 +632,6 @@ def plot_fixed_landscape_minima_pair(
     if plot_average:
         return x_ref, center_y, y_low, y_high
 
-def plot_perturb_probs(
     x,
     y_lists,
     labels=None,

@@ -550,7 +550,7 @@ def plot_fixed_landscape_minima_pair(
     plot_x_error=False,             # NEW: include x error bars if True
     show_plot=True,
     xlabel_size=12, ylabel_size=12, title_size=14,
-    legend_size=12,
+    legend_size=12, tick_size=12,
     base_shift=0,
     show_average_spread_label = True,
     # Special plotting parameters:
@@ -561,6 +561,7 @@ def plot_fixed_landscape_minima_pair(
     natural_marker="o",             # marker style for natural minima
     other_marker="o",               # marker style for others
     figsize=None,                   # NEW: optional figure size override
+    seed_count=True,
 ):
     """
     General-purpose plotting function for relationships between model data.
@@ -595,7 +596,9 @@ def plot_fixed_landscape_minima_pair(
     xlabel_plot = "Ranked " + xlabel if ranking else xlabel
     ylabel_plot = "Ranked " + ylabel if ranking else ylabel
 
-    plt.figure(figsize=figsize if figsize is not None else (6, 5), constrained_layout=True)
+    fig = plt.figure(figsize=figsize if figsize is not None else (6, 5), constrained_layout=True)
+    ax = plt.gca()
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2))    
     
     processed_x, processed_y = [], []
 
@@ -652,6 +655,10 @@ def plot_fixed_landscape_minima_pair(
             label_center = "Mean"
             label_spread = "1 Std"
             color = "black"
+
+        if seed_count:
+            num_seeds = len(processed_x)
+            label_spread += f" ({num_seeds} Seeds)"
     
         if average_style == "shaded":
             plt.plot(x_ref, center_y, color=color, linewidth=3, linestyle=":",
@@ -767,6 +774,9 @@ def plot_fixed_landscape_minima_pair(
     plt.xlabel(xlabel_plot, fontsize=xlabel_size)
     plt.ylabel(ylabel_plot, fontsize=ylabel_size)
 
+    plt.xticks(fontsize=tick_size)
+    plt.yticks(fontsize=tick_size)
+
     if log_scale:
         plt.xscale("log")
 
@@ -794,75 +804,6 @@ def plot_fixed_landscape_minima_pair(
     if plot_average:
         return x_ref, center_y, y_low, y_high
 
-def plot_perturb_probs(
-    x,
-    y_lists,
-    labels=None,
-    colors=None,
-    linestyles=None,
-    alpha=0.5,
-    xlabel="x",
-    ylabel="y",
-    title=None,
-    show_plot=True,
-    xlabel_size=12,
-    ylabel_size=12,
-    title_size=14,
-    legend_size=12,
-    ylim=None,
-    output_dir=None,
-    filename=None
-):
-    """
-    Simple plotting function for multiple y lines over the same x-axis.
-    Style: bright red lines, no markers, semi-transparent for multiple lines.
-
-    Args:
-        x (array-like): Shared x-axis values.
-        y_lists (list of array-like): List of y-values to plot.
-        labels (list of str): Labels for the legend.
-        colors (list of str): Colors for each line (overrides default red).
-        linestyles (list of str): Linestyles for each line.
-        alpha (float): Transparency for lines.
-        xlabel, ylabel, title: Plot labels.
-        show_plot (bool): Whether to call plt.show().
-        ylim (tuple): Optional y-axis limits.
-        output_dir (str): Optional directory to save figure.
-        filename (str): Optional filename (saved as .png).
-    """
-    plt.figure(figsize=(8, 5))
-
-    n_lines = len(y_lists)
-    if labels is None:
-        labels = [None] * n_lines
-    if colors is None:
-        # Default bright red
-        colors = ['red'] * n_lines
-    if linestyles is None:
-        linestyles = ['-'] * n_lines
-
-    for y, label, color, ls in zip(y_lists, labels, colors, linestyles):
-        plt.plot(x, y, label=label, color=color, linestyle=ls, alpha=alpha, linewidth=2)
-
-    plt.xlabel(xlabel, fontsize=xlabel_size)
-    plt.ylabel(ylabel, fontsize=ylabel_size)
-    if ylim is not None:
-        plt.ylim(*ylim)
-    if title is not None:
-        plt.title(title, fontsize=title_size)
-    plt.grid(True)
-    if any(labels):
-        plt.legend()
-
-    if output_dir and filename:
-        os.makedirs(output_dir, exist_ok=True)
-        save_path = os.path.join(output_dir, filename + ".png")
-        plt.savefig(save_path, bbox_inches="tight")
-
-    if show_plot:
-        plt.show()
-    plt.close()
-        
 def plot_individual_traces(minima_results, minima_trained_on_additional_data_level, base_shift, color, alpha, sort_x):
     """
     Plot volumes for minima trained with a given amount of additional data.
@@ -992,7 +933,7 @@ def plot_minima_volume_vs_data_level(
     show_plot=True,
     central_tendency="mean",
     xlabel_size=12, ylabel_size=12, title_size=14, suptitle_size=18,
-    legend_size=12, legend_title_fontsize=12, legend_loc="best",
+    legend_size=12, legend_title_fontsize=12, tick_size = 12, legend_loc="best",
     show_legend=True,
     data_type=None,
     base_train_size=None,
@@ -1039,7 +980,10 @@ def plot_minima_volume_vs_data_level(
     if title is None:
         title = f"{ylabel} vs {xlabel}"
 
-    plt.figure(figsize=(6, 5), constrained_layout=True)
+    fig = plt.figure(figsize=(6, 5), constrained_layout=True)
+    ax = plt.gca()
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2))
+    
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
 
@@ -1120,6 +1064,10 @@ def plot_minima_volume_vs_data_level(
     plt.title(title, fontsize=title_size)
     plt.grid(True)
 
+    # --- Tickmark sizes ---
+    plt.xticks(fontsize=tick_size)
+    plt.yticks(fontsize=tick_size)
+    
     # --- Legend and bounds ---
     if show_legend:
         plt.legend(
