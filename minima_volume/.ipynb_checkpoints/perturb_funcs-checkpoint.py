@@ -369,7 +369,6 @@ def analyze_wiggles_metrics(
                     )
                     
                     wiggle_result.update({
-                        'coefficients': coefficients,
                         'perturbation_seed': seed,
                         'perturbation_norm': float(perturb_norm.item()),
                     })
@@ -545,7 +544,6 @@ def analyze_wiggles_metrics_large(
                     total_forward_time += f_time
 
                     wiggle_result.update({
-                        'coefficients': coefficients,
                         'perturbation_seed': seed,
                         'perturbation_norm': float(perturb_norm.item()),
                     })
@@ -666,7 +664,6 @@ def analyze_wiggle_metrics_fixed_dataset(
                 )
                 
                 wiggle_result.update({
-                    'coefficients': coefficients,
                     'perturbation_seed': seed,
                     'perturbation_norm': float(perturb_norm.item()),
                 })
@@ -797,7 +794,6 @@ def analyze_wiggle_metrics_no_filternorm(
                     )
                     
                     wiggle_result.update({
-                        'coefficients': coefficients,
                         'perturbation_seed': seed,
                         'perturbation_norm': float(perturb_norm.item()),
                     })

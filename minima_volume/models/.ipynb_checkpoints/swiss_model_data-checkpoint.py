@@ -200,7 +200,7 @@ def verify_model_results(
             probs = torch.sigmoid(logits).reshape(xx.shape).cpu()
 
         # Plot
-        plt.figure(figsize=(6, 6))
+        plt.figure(figsize=(6, 6), constrained_layout=True)
         plt.contourf(xx.numpy(), yy.numpy(), probs.numpy(), levels=50, cmap='bwr', alpha=0.6)
 
         # Clean + additional training data
@@ -223,8 +223,13 @@ def verify_model_results(
             pad=20,
             fontsize=15
         )
-        plt.xlabel("Feature 1", fontsize = 15)
-        plt.ylabel("Feature 2", fontsize = 15)
+        plt.xlabel("Feature 1", fontsize = 20)
+        plt.ylabel("Feature 2", fontsize = 20)
+
+        # Custom ticks
+        plt.xticks([-10, 0, 10], fontsize=15)
+        plt.yticks([-10, 0, 10], fontsize=15)
+
         plt.legend(loc='upper left', fontsize = 15)
 
         # Add annotation about proportion of additional data
