@@ -598,7 +598,8 @@ def plot_fixed_landscape_minima_pair(
 
     fig = plt.figure(figsize=figsize if figsize is not None else (6, 5), constrained_layout=True)
     ax = plt.gca()
-    ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2))    
+    ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2)) 
+    ax.yaxis.get_offset_text().set_fontsize(12)  # Change 20 to your desired size
     
     processed_x, processed_y = [], []
 
@@ -983,6 +984,7 @@ def plot_minima_volume_vs_data_level(
     fig = plt.figure(figsize=(6, 5), constrained_layout=True)
     ax = plt.gca()
     ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2))
+    ax.yaxis.get_offset_text().set_fontsize(12)  # Change 20 to your desired size
     
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
