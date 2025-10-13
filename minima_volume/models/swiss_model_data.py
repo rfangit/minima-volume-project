@@ -202,17 +202,28 @@ def verify_model_results(
         # Plot
         plt.figure(figsize=(6, 6), constrained_layout=True)
         plt.contourf(xx.numpy(), yy.numpy(), probs.numpy(), levels=50, cmap='bwr', alpha=0.6)
-
+        
         # Clean + additional training data
-        plt.scatter(x_base_train[:,0].cpu(), x_base_train[:,1].cpu(),
-                    c=y_base_train.cpu(), cmap='bwr', edgecolor='k',
-                    s=60, alpha=0.9, label='Base Train')
+        plt.scatter(
+            x_base_train[:, 0].cpu(), x_base_train[:, 1].cpu(),
+            c=y_base_train.cpu(), cmap='bwr', edgecolor='k',
+            s=60, alpha=0.9, label='Base Train'
+        )
+        
         if additional_data > 0:
-            plt.scatter(x_additional[:additional_data,0].cpu(),
-                        x_additional[:additional_data,1].cpu(),
-                        marker='x', color='black', s=120,
-                        linewidths=3, alpha=1,
-                        label=f'Extra ({dataset_type}, {additional_data})')
+            # Determine label based on dataset_type
+            if dataset_type == 'poison':
+                add_label = 'Poison'
+            else:
+                add_label = f'Extra ({dataset_type}, {additional_data})'
+        
+            plt.scatter(
+                x_additional[:additional_data, 0].cpu(),
+                x_additional[:additional_data, 1].cpu(),
+                marker='x', color='black', s=120,
+                linewidths=3, alpha=1,
+                label=add_label
+            )
 
         # Title / annotation
         final_test_acc = model_data['test_accs'][-1]
