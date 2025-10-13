@@ -207,13 +207,13 @@ def verify_model_results(
         plt.scatter(
             x_base_train[:, 0].cpu(), x_base_train[:, 1].cpu(),
             c=y_base_train.cpu(), cmap='bwr', edgecolor='k',
-            s=60, alpha=0.9, label='Base Train'
+            s=60, alpha=0.9, label='Base Train Data'
         )
         
         if additional_data > 0:
             # Determine label based on dataset_type
             if dataset_type == 'poison':
-                add_label = 'Poison'
+                add_label = 'Poison Data'
             else:
                 add_label = f'Extra ({dataset_type}, {additional_data})'
         
@@ -241,7 +241,7 @@ def verify_model_results(
         plt.xticks([-10, 0, 10], fontsize=15)
         plt.yticks([-10, 0, 10], fontsize=15)
 
-        plt.legend(loc='upper left', fontsize = 15)
+        plt.legend(loc='upper left', fontsize = 12)
 
         # Add annotation about proportion of additional data
         #if additional_data > 0:
