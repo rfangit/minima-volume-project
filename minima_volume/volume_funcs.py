@@ -923,6 +923,12 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
         y_axis_key='test_loss'
     )
 
+    _, test_accs = extract_data(
+        data_dict=data_dictionary,
+        x_axis_key='train_loss',
+        y_axis_key='test_accs'
+    )
+
     # ========== COMPUTE TOP K PERTURBATIONS ==========
     # Initialize lists to store top k perturbations across all models
     top_r_vals_all_models = []
@@ -1127,6 +1133,7 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
         "dataset_type": dataset_type.item(),  # Extract string from numpy array
         "top_r_vals": top_r_vals_all_models,  # List of lists: 5x50 for 5 models
         "top_r_val_seeds": top_r_val_seeds_all_models,  # List of lists: 5x50 for 5 models
+        "test_acc_values": test_accs,
     }
 
     # Combine both dictionaries for saving
