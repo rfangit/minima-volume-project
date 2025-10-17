@@ -648,8 +648,8 @@ def plot_pair_metrics(metric1_values: list,
         
         # Create best fit line
         fit_line = np.polyval(coefficients, sorted_metric1)
-        plt.plot(sorted_metric1, fit_line, '--', color='red', linewidth=2, 
-                 label=f'Linear Fit Line')
+        plt.plot(sorted_metric1, fit_line, '--', color='red', linewidth=3, 
+                 label=f'Linear Fit')
     
     # Formatting
     plt.xlabel(xlabel, fontsize=12)
