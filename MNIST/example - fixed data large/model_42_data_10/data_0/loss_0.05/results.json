@@ -125,6 +125,9 @@
       46
     ]
   ],
+  "test_acc_values": [
+    0.8875
+  ],
   "loss_predicts_minimas": true,
   "loss_ordering_violations": 0,
   "test_loss_ranks": [
