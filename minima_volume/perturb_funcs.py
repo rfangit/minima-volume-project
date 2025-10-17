@@ -329,7 +329,7 @@ def analyze_wiggles_metrics(
         for model_data in model_list:
             model_trained_data = model_data['additional_data']
             print(f"Testing model trained on {model_trained_data} additional data.")
-            if model_trained_data >= additional_data:
+            if True: #model_trained_data >= additional_data:
                 # Retrieve test performance for all metrics dynamically
                 test_performance = {}
                 for metric_name in metrics.keys():
