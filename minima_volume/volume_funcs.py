@@ -606,7 +606,13 @@ def plot_pair_metrics(metric1_values: list,
                      ylim: tuple = None,
                      connect_dots: bool = True,
                      label: str = 'Data',
-                     show_best_fit: bool = False): 
+                     show_best_fit: bool = False,
+                     xlabel_size: int = 12,
+                     ylabel_size: int = 12,
+                     title_size: int = 14,
+                     legend_size: int = 10,
+                     tick_size: int = 12,
+                     alpha: float = 0.3): 
     """
     Plot of a metric vs model additional data levels with connected dots, sorted by x-axis values
     
@@ -622,6 +628,12 @@ def plot_pair_metrics(metric1_values: list,
         connect_dots: Whether to connect the dots with lines (default: True)
         label: Label for the data series in the legend (default: 'Data')
         show_best_fit: Whether to show linear best fit line (default: False)
+        xlabel_size: Font size for x-axis label (default: 12)
+        ylabel_size: Font size for y-axis label (default: 12)
+        title_size: Font size for title (default: 14)
+        legend_size: Font size for legend (default: 10)
+        tick_size: Font size for axis tick labels (default: 12)
+        alpha: Transparency of grid lines (default: 0.3)
     """
     # Sort both lists together based on metric1_values (x-axis)
     sorted_pairs = sorted(zip(metric1_values, metric2_values))
@@ -652,9 +664,11 @@ def plot_pair_metrics(metric1_values: list,
                  label=f'Linear Fit')
     
     # Formatting
-    plt.xlabel(xlabel, fontsize=12)
-    plt.ylabel(ylabel, fontsize=12)
-    plt.title(title, fontsize=14)
+    plt.xlabel(xlabel, fontsize=xlabel_size)
+    plt.ylabel(ylabel, fontsize=ylabel_size)
+    plt.title(title, fontsize=title_size)
+    plt.xticks(fontsize=tick_size)
+    plt.yticks(fontsize=tick_size)
     if log_scale:
         plt.yscale('log')
 
@@ -664,8 +678,8 @@ def plot_pair_metrics(metric1_values: list,
     if ylim is not None:
         plt.ylim(ylim)
         
-    plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=10)
+    plt.grid(True, alpha=alpha)
+    plt.legend(fontsize=legend_size)
     plt.tight_layout()
     
     # Save the plot if save_path is provided
