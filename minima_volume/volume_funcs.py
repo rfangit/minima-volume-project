@@ -603,7 +603,10 @@ def plot_pair_metrics(metric1_values: list,
                      save_path: str = None,
                      display: bool = True,
                      xlim: tuple = None,
-                     ylim: tuple = None): 
+                     ylim: tuple = None,
+                     connect_dots: bool = True,
+                     label: str = 'Data',
+                     show_best_fit: bool = False): 
     """
     Plot of a metric vs model additional data levels with connected dots, sorted by x-axis values
     
@@ -616,6 +619,9 @@ def plot_pair_metrics(metric1_values: list,
         log_scale: Whether to use log scale for y-axis
         save_path: Path to save the plot (if None, plot is displayed but not saved)
         display: Whether to display the plot (default: True)
+        connect_dots: Whether to connect the dots with lines (default: True)
+        label: Label for the data series in the legend (default: 'Data')
+        show_best_fit: Whether to show linear best fit line (default: False)
     """
     # Sort both lists together based on metric1_values (x-axis)
     sorted_pairs = sorted(zip(metric1_values, metric2_values))
@@ -623,9 +629,27 @@ def plot_pair_metrics(metric1_values: list,
     
     plt.figure(figsize=(8, 5))
     
-    # Plot dots connected by lines using sorted values
-    plt.plot(sorted_metric1, sorted_metric2, 'o-', color='blue', 
-             markersize=8, linewidth=2, label='Data')
+    # Plot dots, optionally connected by lines using sorted values
+    marker_style = 'o-' if connect_dots else 'o'
+    plt.plot(sorted_metric1, sorted_metric2, marker_style, color='blue', 
+             markersize=8, linewidth=2, label=label)
+    
+    # Add linear best fit line if requested
+    if show_best_fit:
+        # Calculate linear regression (y = mx + b)
+        coefficients = np.polyfit(sorted_metric1, sorted_metric2, 1)
+        slope, intercept = coefficients
+        
+        # Calculate R² value
+        y_pred = np.polyval(coefficients, sorted_metric1)
+        ss_res = np.sum((sorted_metric2 - y_pred) ** 2)
+        ss_tot = np.sum((sorted_metric2 - np.mean(sorted_metric2)) ** 2)
+        r_squared = 1 - (ss_res / ss_tot)
+        
+        # Create best fit line
+        fit_line = np.polyval(coefficients, sorted_metric1)
+        plt.plot(sorted_metric1, fit_line, '--', color='red', linewidth=2, 
+                 label=f'Linear Fit Line')
     
     # Formatting
     plt.xlabel(xlabel, fontsize=12)
