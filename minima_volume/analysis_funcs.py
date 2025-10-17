@@ -117,11 +117,12 @@ def load_volume_results(model_folder, data_modification, loss_value):
     log_exp_r_n_values = results["log_exp_r_n_values"]
     test_loss_values = results["test_loss_values"]
     model_data_levels = results["model_data_levels"]
+    test_acc_values = results["test_acc_values"]
 
-    sorted_tuples = sorted(zip(model_data_levels, log_exp_r_n_values, test_loss_values), key=lambda x: x[0])
-    mdl_sorted, log_sorted, loss_sorted = zip(*sorted_tuples)
+    sorted_tuples = sorted(zip(model_data_levels, log_exp_r_n_values, test_loss_values, test_acc_values), key=lambda x: x[0])
+    mdl_sorted, log_sorted, loss_sorted, acc_sorted = zip(*sorted_tuples)
 
-    return list(mdl_sorted), list(log_sorted), list(loss_sorted)
+    return list(mdl_sorted), list(log_sorted), list(loss_sorted), list(acc_sorted)
 
 def load_perturb_probs(model_folder, data_modification, loss_value):
     """
@@ -285,17 +286,17 @@ def multiple_minima_fixed_landscape(experiment_folders, target_data_modification
     else:
         folders_to_use = experiment_folders
 
-    all_model_data_levels, all_log_exp_r_n, all_test_loss = [], [], []
+    all_model_data_levels, all_log_exp_r_n, all_test_loss, all_test_acc = [], [], [], []
 
     for model_folder in folders_to_use:
-        mdl, log_rn, test_loss = load_volume_results(model_folder, target_data_modification, loss_value)
+        mdl, log_rn, test_loss, test_acc = load_volume_results(model_folder, target_data_modification, loss_value)
         if mdl is None:
             continue
         all_model_data_levels.append(mdl)
         all_log_exp_r_n.append(log_rn)
         all_test_loss.append(test_loss)
-
-    return all_model_data_levels, all_log_exp_r_n, all_test_loss
+        all_test_acc.append(test_acc)
+    return all_model_data_levels, all_log_exp_r_n, all_test_loss, all_test_acc
 
 def multiple_minima_fixed_landscape_perturb_probs(experiment_folders, target_data_modification, loss_value, selected_folders=None):
     """
