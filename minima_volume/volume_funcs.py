@@ -1078,15 +1078,16 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
             display=display_options['accuracy_plots']
         )
     
-        plot_metric_distributions(
-            categories=model_data_levels_acc,
-            metric_values=accuracy_list,
-            category_name=additional_param_level,
-            metric_name="Perturbation Radius",
-            title="Radius Distributions by "+additional_param_level,
-            save_path=save_paths_dict["radius_histogram_acc"],
-            display=display_options['accuracy_plots']
-        )
+        if any(accuracy_list):
+            plot_metric_distributions(
+                categories=model_data_levels_acc,
+                metric_values=accuracy_list,
+                category_name=additional_param_level,
+                metric_name="Perturbation Radius",
+                title="Radius Distributions by "+additional_param_level,
+                save_path=save_paths_dict["radius_histogram_acc"],
+                display=display_options['accuracy_plots']
+            )
     
         plot_pair_metrics(
             metric1_values=model_data_levels_acc,
