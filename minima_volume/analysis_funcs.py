@@ -56,6 +56,7 @@
 # =====================
 import os
 import json
+import math
 from pathlib import Path
 from itertools import cycle
 
@@ -64,6 +65,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.collections import LineCollection
 from matplotlib.legend_handler import HandlerTuple
+from matplotlib.colors import Normalize
 from scipy.stats import rankdata
 
 # ============================================================
@@ -407,11 +409,12 @@ def model_volume_varying_landscape(target_model_data_level, loss_value, experime
                 idx = model_data_levels.index(target_model_data_level)
                 log_exp_rn = results.get("log_exp_r_n_values", [])[idx]
                 test_loss = results.get("test_loss_values", [])[idx]
+                test_acc = results.get("test_acc_values", [])[idx]
 
                 parts = data_mod_folder.name.split("_")
                 data_level = int(parts[-1]) if len(parts) > 1 and parts[-1].isdigit() else None
 
-                results_list.append((data_level, log_exp_rn, test_loss))
+                results_list.append((data_level, log_exp_rn, test_loss, test_acc))
 
         except Exception as e:
             print(f"Error reading {results_file}: {e}")
@@ -421,8 +424,8 @@ def model_volume_varying_landscape(target_model_data_level, loss_value, experime
     loss_landscape_data_levels = [r[0] for r in results_list]
     all_log_exp = [r[1] for r in results_list]
     all_test_loss = [r[2] for r in results_list]
-
-    return all_log_exp, all_test_loss, loss_landscape_data_levels
+    all_test_acc = [r[3] for r in results_list]
+    return all_log_exp, all_test_loss, all_test_acc, loss_landscape_data_levels
 
 def model_volume_multiple_experiments(target_model_data_level, loss_value, experiment_folders, base_dir=None):
     """
@@ -431,7 +434,7 @@ def model_volume_multiple_experiments(target_model_data_level, loss_value, exper
     experiment_results = []
 
     for exp_folder in experiment_folders:
-        log_exp, test_loss, data_levels = model_volume_varying_landscape(
+        log_exp, test_loss, test_acc, data_levels = model_volume_varying_landscape(
             target_model_data_level=target_model_data_level,
             loss_value=loss_value,
             experiment_folder=exp_folder,
@@ -443,6 +446,7 @@ def model_volume_multiple_experiments(target_model_data_level, loss_value, exper
                 "log_exp": log_exp,
                 "test_loss": test_loss,
                 "data_levels": data_levels,
+                "test_acc": test_acc,
             })
 
     print(f"Collected results for {len(experiment_results)} experiments")
@@ -806,7 +810,7 @@ def plot_fixed_landscape_minima_pair(
     if plot_average:
         return x_ref, center_y, y_low, y_high
 
-def plot_individual_traces(minima_results, minima_trained_on_additional_data_level, base_shift, color, alpha, sort_x):
+def plot_individual_traces(minima_results, minima_trained_on_additional_data_level, base_shift, color, alpha, sort_x, plot_accuracy_colors):
     """
     Plot volumes for minima trained with a given amount of additional data.
 
@@ -815,6 +819,7 @@ def plot_individual_traces(minima_results, minima_trained_on_additional_data_lev
             {
                 "data_levels": list[int|float],  # Data levels used when probing the minima
                 "log_exp": list[float],          # Corresponding log(volume) values
+                "test_acc": list[float],         # Corresponding test accuracy values
             }
 
         minima_trained_on_additional_data_level (int|float):
@@ -828,8 +833,9 @@ def plot_individual_traces(minima_results, minima_trained_on_additional_data_lev
         alpha (float):
         sort_x (bool):
     Returns:
-        tuple[list[np.ndarray], list[np.ndarray]]:
-            all_x, all_y — Lists containing x and y arrays for every minima trace.
+        tuple[list[np.ndarray], list[np.ndarray], float, float]:
+            all_x, all_y, min_acc, max_acc — Lists containing x and y arrays for every minima trace,
+            and the minimum and maximum accuracy values used for color mapping.
     """
     all_x, all_y = [], []
 
@@ -837,9 +843,34 @@ def plot_individual_traces(minima_results, minima_trained_on_additional_data_lev
     min_len = min(len(m["log_exp"]) for m in minima_results)
     print(f"Plotting minima trained with {minima_trained_on_additional_data_level} additional data points")
 
+    min_acc = min(m["test_acc"][0] for m in minima_results)
+    max_acc = max(m["test_acc"][0] for m in minima_results)
+    # min_acc = math.floor(min(m["test_acc"][0] for m in minima_results) / 0.02) * 0.02
+    # max_acc = math.ceil(max(m["test_acc"][0] for m in minima_results) / 0.02) * 0.02
+
+    cmap = plt.get_cmap("RdYlGn")
+
+    start_val = 0.0  # starting position on colormap (0.0 to 1.0)
+    end_val = 1    # ending position on colormap (0.0 to 1.0)
+
+    def level_to_colormap_position(level):
+        # Map level from [min_level, max_level] to [start_val, end_val]
+        if max_acc == min_acc:
+            return start_val
+        normalized = (level - min_acc) / (max_acc - min_acc)
+        return start_val + normalized * (end_val - start_val)
+
+    def get_color(acc):
+        return cmap(level_to_colormap_position(acc))
+
     for minima in minima_results:
         x_vals = [x + base_shift for x in minima["data_levels"][:min_len]]
         y_vals = minima["log_exp"][:min_len]
+        acc = minima["test_acc"][0]
+        if plot_accuracy_colors:
+            color = get_color(acc)
+        else:
+            color = color
 
         # Sort by x for consistent plotting
         if sort_x:
@@ -862,7 +893,7 @@ def plot_individual_traces(minima_results, minima_trained_on_additional_data_lev
                 zorder=3
             )
 
-    return all_x, all_y
+    return all_x, all_y, min_acc, max_acc
 
 
 def plot_average_curve(minima_results, minima_trained_on_additional_data_level, base_shift, color, sort_x, central_tendency):
@@ -942,6 +973,7 @@ def plot_minima_volume_vs_data_level(
     xlim=None,
     ylim=None,
     yticks=None,
+    plot_accuracy_colors=False,
 ):
     """
     Plot the minima volumes (log volume) versus the data level they were evaluated on.
@@ -986,7 +1018,6 @@ def plot_minima_volume_vs_data_level(
     ax = plt.gca()
     ax.ticklabel_format(style='sci', axis='y', scilimits=(0,2))
     ax.yaxis.get_offset_text().set_fontsize(12)  # Change 20 to your desired size
-    
     color_cycle = cycle(plt.cm.tab10.colors)
     level_to_color = {level: next(color_cycle) for level in results_dict.keys()}
 
@@ -1014,13 +1045,14 @@ def plot_minima_volume_vs_data_level(
 
         # --- Plot the minima found with this data level. ---
         if not plot_only_average:
-            plot_individual_traces(
+            all_x, all_y, min_acc, max_acc = plot_individual_traces(
                 exp_results,
                 minima_trained_on_additional_data_level,
                 base_shift,
                 color,
                 alpha,
-                sort_x
+                sort_x,
+                plot_accuracy_colors
             )
 
         # --- Plot average ± spread for minima trained on a certain amount of data ---
@@ -1073,12 +1105,25 @@ def plot_minima_volume_vs_data_level(
     
     # --- Legend and bounds ---
     if show_legend:
-        plt.legend(
-            title=legend_title,
-            fontsize=legend_size,
-            title_fontsize=legend_title_fontsize,
-            loc=legend_loc
-        )
+        if plot_accuracy_colors:
+            # Create a custom legend for the accuracy gradient
+            cmap = plt.get_cmap("RdYlGn")
+            
+            # Create a colorbar as a legend
+            sm = plt.cm.ScalarMappable(cmap=cmap, norm=Normalize(vmin=min_acc, vmax=max_acc))
+            sm.set_array([])
+            
+            # Add colorbar with accuracy label
+            cbar = plt.colorbar(sm, ax=plt.gca(), shrink=0.8, aspect=20)
+            cbar.set_label('Test Accuracy', rotation=270, labelpad=20, fontsize=legend_size)
+            cbar.ax.tick_params(labelsize=tick_size)
+        else:
+            plt.legend(
+                title=legend_title,
+                fontsize=legend_size,
+                title_fontsize=legend_title_fontsize,
+                loc=legend_loc
+            )
 
     if yticks is not None:
         plt.yticks(yticks)
