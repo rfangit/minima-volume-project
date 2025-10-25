@@ -466,12 +466,11 @@ def wiggle_evaluator_large(
         total_forward_time,
     )
 
-
 def analyze_wiggles_metrics_large(
     model_list,
     x_base_train, y_base_train,
     x_additional, y_additional,
-    x_test, y_test,
+    #x_test, y_test, #unecessary in our wiggles, save memory
     dataset_quantities,
     dataset_type,
     metrics,
@@ -487,7 +486,7 @@ def analyze_wiggles_metrics_large(
         device = x_base_train.device
     x_base_train, y_base_train = x_base_train.to(device), y_base_train.to(device)
     x_additional, y_additional = x_additional.to(device), y_additional.to(device)
-    x_test, y_test = x_test.to(device), y_test.to(device)
+    #x_test, y_test = x_test.to(device), y_test.to(device)
 
     seed_list = [perturbation_seed + i for i in range(num_directions)]
 

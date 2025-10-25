@@ -27,10 +27,10 @@ Functions:
 * `grab_param_num`
 * `extract_and_store_train_loss`
 * `extract_and_sort_data`
-* `loss_threshold`
-* `process_wiggle_results`
+* `find_loss_threshold_index`
+* `wiggle_threshold_radii`
 * `accuracy_threshold`
-* `process_wiggle_accuracy_results`
+* `wiggle_threshold_radii_acc`
 * `compute_log_power_mean`
 * `compute_power_mean`
 * `compute_median`
@@ -261,7 +261,7 @@ def extract_data(data_dict, x_axis_key, y_axis_key):
     
     return x_values, y_values
     
-def loss_threshold(loss_values: list, threshold: float) -> int:
+def find_loss_threshold_index(loss_values: list, threshold: float) -> int:
     """
     Find the first index where loss exceeds given threshold.
     
@@ -276,7 +276,7 @@ def loss_threshold(loss_values: list, threshold: float) -> int:
     above_threshold = np.where(loss_array > threshold)[0]
     return above_threshold[0] if len(above_threshold) > 0 else len(loss_array)
 
-def process_wiggle_results(data_dictionary, threshold=0.1):
+def wiggle_threshold_radii(data_dictionary, threshold=0.1):
     """
     Process wiggle results across all models in data_dictionary to find threshold violations
     and compute perturbation radii. Adds 'r_vals' to each model's entry.
@@ -303,7 +303,7 @@ def process_wiggle_results(data_dictionary, threshold=0.1):
             #print (loss)
             
             # Find first index where loss exceeds threshold
-            violation_idx = loss_threshold(loss, threshold)
+            violation_idx = find_loss_threshold_index(loss, threshold)
 
             # Check if not at end of array.
             # If it's at the end of the array, that means it never crossed a threshold, and don't add anything
@@ -322,7 +322,7 @@ def process_wiggle_results(data_dictionary, threshold=0.1):
     return data_dictionary
 
 # Accuracy Variants
-def accuracy_threshold(accuracy_values, threshold):
+def find_accuracy_threshold_index(accuracy_values, threshold):
     """
     Find the index of the first element in accuracy_values that drops below the threshold.
     """
@@ -332,7 +332,7 @@ def accuracy_threshold(accuracy_values, threshold):
     # Return first index if any exist, otherwise None
     return below_threshold[0] if len(below_threshold) > 0 else len(accuracy_array)
 
-def process_wiggle_accuracy_results(data_dictionary, threshold=0.8):
+def wiggle_threshold_radii_acc(data_dictionary, threshold=0.8):
     """
     Process wiggle results across all models in data_dictionary to find accuracy threshold violations
     and compute perturbation radii. Adds 'r_vals' to each model's entry.
@@ -357,7 +357,7 @@ def process_wiggle_accuracy_results(data_dictionary, threshold=0.8):
         for i in range(num_results):
             accs = model_data['wiggle_results'][i]['accs']            
             # Find first index where accs exceeds threshold
-            violation_idx = loss_threshold(accs, threshold)
+            violation_idx = find_accuracy_threshold_index(accs, threshold)
 
             # Check if not at end of array.
             # If it's at the end of the array, that means it never crossed the threshold, and don't add anything
@@ -368,7 +368,6 @@ def process_wiggle_accuracy_results(data_dictionary, threshold=0.8):
                 # Compute perturbed radius and store
                 radius = coeff * model_data['wiggle_results'][i]['perturbation_norm']
                 perturb_radii.append(radius)
-        processed_full_data = process_wiggle_results(data_dictionary, threshold=0.15)
 
         # Add the computed radii to the model's data
         model_data['accuracy_r_vals'] = perturb_radii
@@ -844,19 +843,24 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
                                     max_perturbs = None):
     """
     Analyze model landscape by processing wiggle data and generating various plots.
+    What this code does is it grabs the parameters from the first model
+    Then it takes in the user specified loss threshold, and runs process_wiggle_results
+    which finds when each of the perturbations crosses that threshold.
+    It stores this value into the model's data dictionary, and then pulls pairs
+    of values for plotting. This allows it to plot the model data level vs the perturbation radii.
+
+    It also supports similar functionality for accuracy and histograms, but these aren't
+    necessary in this small demo.
 
     Args:
         directory (str): Directory path where input data is stored
-        loss_threshold (float): Threshold value for processing wiggle loss results
+        loss_threshold_vals (float): Threshold value for processing wiggle loss results
         acc_threshold (float): Threshold value for processing wiggle accuracy results
         verbose (bool): If True, print detailed verification and evaluation messages
         display_options (dict): Which plots to display (not save)
-        top_k (int): Number of top perturbations
-        save_paths_dict (dict): Dictionary specifying paths where plots should be saved.
+        top_k (int): Number of top perturbations - Not used
+        save_paths_dict (dict): Dictionary specifying paths where plots should be saved - Not used
         max_perturbs (int, optional): Maximum number of perturbations to consider for each minima.
-
-    Returns:
-        dict: Dictionary containing computed metrics and processed data
     """
     
     if display_options is None:
@@ -910,7 +914,7 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
     ######### LOSS ANALYSIS #########
     #############################################################
     
-    processed_full_data = process_wiggle_results(data_dictionary, threshold=loss_threshold)
+    processed_full_data = wiggle_threshold_radii(data_dictionary, threshold=loss_threshold)
     model_data_levels, radii_list = extract_data(
         data_dict=processed_full_data,
         x_axis_key='model_trained_data',
@@ -1012,7 +1016,7 @@ def analyze_and_plot_model_landscape(directory, loss_threshold, acc_threshold, v
     ######### ACCURACY ANALYSIS #########
     #############################################################
     if acc_threshold is not None:
-        processed_acc = process_wiggle_accuracy_results(data_dictionary, threshold=acc_threshold)
+        processed_acc = wiggle_threshold_radii_acc(data_dictionary, threshold=acc_threshold)
         model_data_levels_acc, accuracy_list = extract_data(
             data_dict=processed_acc,
             x_axis_key='model_trained_data',

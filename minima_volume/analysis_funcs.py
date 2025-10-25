@@ -635,7 +635,10 @@ def plot_fixed_landscape_minima_pair(
     if plot_average and processed_x:
         x_array = np.array(processed_x)
         y_array = np.array(processed_y)
-    
+
+        # Replace +inf and -inf with nan
+        y_array = np.where(np.isinf(y_array), np.nan, y_array)
+            
         if central_tendency == "median":
             x_ref = np.median(x_array, axis=0)
             center_y = np.median(y_array, axis=0)
@@ -648,7 +651,7 @@ def plot_fixed_landscape_minima_pair(
             color = "black"
         else:
             x_ref = np.mean(x_array, axis=0)
-            center_y = np.mean(y_array, axis=0)
+            center_y = np.nanmean(y_array, axis=0)
             y_std = np.std(y_array, axis=0)
             x_std = np.std(x_array, axis=0)
             y_low, y_high = center_y - y_std, center_y + y_std
@@ -894,14 +897,18 @@ def plot_average_curve(minima_results, minima_trained_on_additional_data_level, 
     log_exp_matrix = np.array([m["log_exp"][:min_len] for m in minima_results])
     data_levels = np.array([x + base_shift for x in minima_results[0]["data_levels"][:min_len]])
 
+    # ✅ Sanitize invalid values (convert inf -> nan)
+    log_exp_matrix = np.where(np.isinf(log_exp_matrix), np.nan, log_exp_matrix)
+    #print (log_exp_matrix)   
     # Compute central tendency and spread
     if central_tendency == "median":
         center_y = np.median(log_exp_matrix, axis=0)
         y_low = np.percentile(log_exp_matrix, 25, axis=0)
         y_high = np.percentile(log_exp_matrix, 75, axis=0)
     else:
-        center_y = np.mean(log_exp_matrix, axis=0)
-        y_std = np.std(log_exp_matrix, axis=0)
+        center_y = np.nanmean(log_exp_matrix, axis=0)
+        #print ("The averages are ", center_y) 
+        y_std = np.nanstd(log_exp_matrix, axis=0)
         y_low = center_y - y_std
         y_high = center_y + y_std
 

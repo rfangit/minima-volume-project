@@ -14,11 +14,11 @@
     625879.18866602
   ],
   "log_exp_r_n_acc_values": [
-    -Infinity,
-    -Infinity,
-    -Infinity,
-    -Infinity,
-    -Infinity
+    877497.7321135139,
+    788054.9106451301,
+    923793.3108370041,
+    842952.2547032507,
+    747412.6232498524
   ],
   "model_data_levels": [
     1940,
@@ -584,13 +584,13 @@
     3,
     1
   ],
-  "accuracy_predicts_minimas": false,
-  "accuracy_ordering_violations": 3,
+  "accuracy_predicts_minimas": true,
+  "accuracy_ordering_violations": 4,
   "log_exp_r_n_acc_ranks": [
-    1,
     2,
-    3,
     4,
+    1,
+    3,
     5
   ]
 }
