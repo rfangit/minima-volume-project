@@ -974,6 +974,7 @@ def plot_minima_volume_vs_data_level(
     ylim=None,
     yticks=None,
     plot_accuracy_colors=False,
+    plot_only_add_train_level=None,
 ):
     """
     Plot the minima volumes (log volume) versus the data level they were evaluated on.
@@ -1026,6 +1027,9 @@ def plot_minima_volume_vs_data_level(
     # Legend title depends on whether we're plotting data experiments
     legend_title = "Trained on:" if data_type else "Minima Trained on Data Level"
     base_shift = base_train_size if data_type == "data" else 0
+
+    if plot_only_add_train_level is not None:
+        results_dict = {plot_only_add_train_level: results_dict[plot_only_add_train_level]}
 
     # --- Iterate over all minima training levels ---
     for minima_trained_on_additional_data_level, exp_results in results_dict.items():
