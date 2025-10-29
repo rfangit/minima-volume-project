@@ -639,7 +639,7 @@ def plot_pair_metrics(metric1_values: list,
     sorted_pairs = sorted(zip(metric1_values, metric2_values))
     sorted_metric1, sorted_metric2 = zip(*sorted_pairs)
     
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(6, 5))
     
     # Plot dots, optionally connected by lines using sorted values
     marker_style = 'o-' if connect_dots else 'o'
