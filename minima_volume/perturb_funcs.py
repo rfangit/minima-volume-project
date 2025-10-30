@@ -283,7 +283,8 @@ def analyze_wiggles_metrics(
     perturbation_seed=0,
     base_output_dir="tests/", 
     device=None,
-    batch_size=None 
+    batch_size=None,
+    skip_existing_files=False
 ):
     if device is None:
         device = x_base_train.device
@@ -330,6 +331,12 @@ def analyze_wiggles_metrics(
             model_trained_data = model_data['additional_data']
             print(f"Testing model trained on {model_trained_data} additional data.")
             if True: #model_trained_data >= additional_data:
+                filename = f"{dataset_type}_{model_trained_data}.npz"
+                full_path = os.path.join(output_dir, filename)
+                if os.path.exists(full_path):
+                    print(f"File {full_path} exists, continuing to next model.")
+                    continue
+                
                 # Retrieve test performance for all metrics dynamically
                 test_performance = {}
                 for metric_name in metrics.keys():
@@ -382,7 +389,7 @@ def analyze_wiggles_metrics(
                     wiggle_results=all_results, 
                     model=model, 
                     output_dir=output_dir,
-                    filename=f"{dataset_type}_{model_trained_data}.npz",
+                    filename=filename,
                     additional_data=additional_data,  # integer for the amount used in this landscape
                     model_trained_data=model_trained_data,  # the integer for the amount of additional data trained on
                     dataset_type=dataset_type,  # string, data/noise/poison
