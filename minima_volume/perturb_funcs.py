@@ -284,7 +284,7 @@ def analyze_wiggles_metrics(
     base_output_dir="tests/", 
     device=None,
     batch_size=None,
-    skip_existing_files=False
+    skip_existing_files=True
 ):
     if device is None:
         device = x_base_train.device
@@ -333,7 +333,7 @@ def analyze_wiggles_metrics(
             if True: #model_trained_data >= additional_data:
                 filename = f"{dataset_type}_{model_trained_data}.npz"
                 full_path = os.path.join(output_dir, filename)
-                if os.path.exists(full_path):
+                if os.path.exists(full_path) and skip_existing_files:
                     print(f"File {full_path} exists, continuing to next model.")
                     continue
                 
