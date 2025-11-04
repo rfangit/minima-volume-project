@@ -876,6 +876,12 @@ def plot_individual_traces(minima_results, minima_trained_on_additional_data_lev
         if sort_x:
             x_vals, y_vals = zip(*sorted(zip(x_vals, y_vals), key=lambda p: p[0]))
 
+        # # Add random noise to debug if points are being shared
+        # if len(y_vals) > 0:
+        #     y_vals = np.array(y_vals)
+        #     noise = np.random.normal(loc=0, scale=0.003 * np.abs(y_vals), size=y_vals.shape)
+        #     y_vals = (y_vals + noise).tolist()
+
         # Plot the trace
         plt.plot(x_vals, y_vals, marker="o", color=color, alpha=alpha)
         all_x.append(x_vals)

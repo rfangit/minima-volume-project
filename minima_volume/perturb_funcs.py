@@ -284,8 +284,9 @@ def analyze_wiggles_metrics(
     base_output_dir="tests/", 
     device=None,
     batch_size=None,
-    skip_existing_files=True
+    skip_existing_files=False
 ):
+    model_list = [model_list[0], model_list[2]] # temporary hardcode for models used in final graphs
     if device is None:
         device = x_base_train.device
     x_base_train, y_base_train = x_base_train.to(device), y_base_train.to(device)
