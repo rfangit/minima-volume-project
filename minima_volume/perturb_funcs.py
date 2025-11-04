@@ -286,7 +286,7 @@ def analyze_wiggles_metrics(
     batch_size=None,
     skip_existing_files=False
 ):
-    model_list = [model_list[0], model_list[2]] # temporary hardcode for models used in final graphs
+    # model_list = [model_list[0], model_list[2]] # temporary hardcode for models used in final graphs (MNIST 1000 and 11,000 training data)
     if device is None:
         device = x_base_train.device
     x_base_train, y_base_train = x_base_train.to(device), y_base_train.to(device)
