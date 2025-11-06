@@ -17,6 +17,3 @@
 
 # Ignore Python cache
 __pycache__/
-
-# Ignore videos directory
-videos/
