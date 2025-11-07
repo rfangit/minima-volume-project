@@ -10,7 +10,7 @@
 # Ignore all .pt, .png, and .npz files
 **/*.pt
 **/*.png
-!videos\combined_figure.png
+!videos/combined_figure.png
 **/*.npz
 
 # Ignore perturb_probs folders
