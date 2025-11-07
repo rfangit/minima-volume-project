@@ -16,7 +16,7 @@ Each experiment runs  **five notebooks** inside a folder (usually named somethin
 | **Volume Cutoff.ipynb**              | Determines the dataset size at which a minima has 0 volume, purely for nicer looking graphs. Results are saved to cutoffs and visualized in loss_curves.png  |                                             |
 | **Test Accuracy.ipynb**              | Obtains the test accuracy of models and saves it in test_accuracies.npz. Used only for nicer looking graphs.                                                 |
 
-Only the first three really matter.
+Only the first three are important, the last two are for nicer visuals and plots.
 
 ---
 

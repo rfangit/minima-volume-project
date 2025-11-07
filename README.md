@@ -103,9 +103,9 @@ This folder contains **all experimental pipelines**. Each subfolder corresponds 
 | `imbalanced_classes/` | Experiments with class imbalanced datasets                            |
 | `sam/`                | Sharpness-Aware Minimization experiments                              |
 
-> Each experiment subdirectory follows a **common workflow**:
-> train model → evaluate perturbations → estimate volume via cutoffs.
-> A dedicated README in `experiments/` explains this pipeline in detail.
+Each experiment follows this **workflow**:
+ train model → evaluate perturbations → estimate volume via cutoffs.
+A dedicated README in `experiments/` explains this in detail.
 
 ---
 
