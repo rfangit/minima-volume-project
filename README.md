@@ -1,149 +1,146 @@
-# 🎢 Minima Volume Experiments
+# **Sharp Minima Can Generalize: A Loss Landscape Perspective on Data**
 
-⚠️ **Note:** The **models** and **data folders** are missing, as are the **random perturbations results**.  
-Only the resulting **volumes** from volume estimation are present.  
-You can still run `analyze_experiments_data.ipynb` to explore results.
+### *Minima Volume Project (Code & Experiments)*
+
+**Paper:** *Prepint Link Here*
+**Tutorial Colab:** *Colab Link Here*
 
 ---
 
-This repository contains code and experiments for analyzing **loss landscape minima volumes** under different training conditions (low data, poisoning, SAM, class imbalance, etc.).  
-The core logic lives in the `minima_volume` package, while experiment-specific code is organized in dedicated folders.
+<p align="center">
+  <em>Insert main paper figure here (e.g., volume vs. performance graph)</em>  
+  <br>
+  <strong>[ TODO: Add image ]</strong>
+</p>
+
+---
+
+This repository contains the **codebase and experiment pipelines** used in the paper **“Sharp Minima Can Generalize: A Loss Landscape Perspective on Data.”**
+It contains tools to measure **the volume of loss landscape minima** in different loss landscapes (formed by different datasets).
+The volumes are interesting to study because of the flat minima hypothesis and the volume hypothesis.
+In the paper we primarily study minima trained on large datasets, observing how their volumes behave in smaller datasets and find results generally consistent with the volume hypothesis:
+the idea that minima found from training typically occupy much larger volumes than minima not found.
+However, our code can also study the volumes of minima from poisoned datasets (as was done in past experiments) and recreate past results on the effects of batch size on flatness and generalization.
+
+The central idea is to estimate **the size (or “volume”) of a minimum** by:
+
+1. Training a model to reach a local minimum of the loss.
+2. Generating **random perturbations** to the model parameters.
+3. Measuring how far one can move in random directions before the loss exceeds a preset threshold.
+4. Using the distances to estimate the **volume** around the minimum.
+
+---
+
+## 🎓 Quick Start (Recommended)
+
+To try a simple minima volume experiment in minutes, we recommend starting with the **interactive Colab tutorial**.
+This walkthrough demonstrates the **entire estimation pipeline** on MNIST, and the experiment folders in this repository are **structured as scalable versions** of the same workflow.
+
+---
+
+## 📦 What This Repository Contains
+
+* Code to **train models** under controlled dataset manipulations
+* Scripts to **apply random perturbations** and measure loss thresholds
+* Tools to **estimate minima volumes** and analyze scaling trends
+* Plotting utilities used to generate figures in the paper
+
+**Note:**
+This repository **does not** include:
+
+* Final trained models
+* Raw perturbation sweeps
+* Full datasets
+
+However, it **does include** the **final volume measurement results** used for the figures in the paper.
+If you wish to regenerate full experimental results, you will need to **rerun the training and perturbation pipelines**.
 
 ---
 
 ## 📂 Repository Structure
 
-### 🔧 Core
-- **`minima_volume/`** – Core package containing main functions, utilities, and analysis code.
+```
+minima-volume-project/
+│
+├── experiments/             # All experiment pipelines (MNIST, CIFAR10, SAM, SVHN, etc.)
+├── minima_volume/           # Core codebase: models, datasets, utilities, analysis logic
+├── minima_volume.egg-info/  # Package
+├── tests/                   # Misc. testing scripts (not actively maintained)
+├── videos/                  # Tools for rendering loss landscape visualizations and animations
+├── visualizations/          # Main paper figures + scripts for generating diagrams
+│
+├── pyproject.toml           # Build + dependency configuration
+└── requirements.txt         # Python package requirements
+```
 
-### 🧪 Experiment Folders
-- **`CIFAR10/`** – Experiments on CIFAR-10 dataset.  
-- **`MNIST/`** – Experiments on MNIST (standard, CNN, SAM, etc.).  
-- **`modulo_arithmetic/`** – Synthetic modulo arithmetic experiments.  
-- **`sam/`** – Sharpness-Aware Minimization (SAM) experiments.  
-- **`swiss_roll/`** – Swiss roll experiments for geometric visualization.  
-- **`imbalanced_classes/`** – Experiments with artificially imbalanced class distributions.  
+### 🔧 Core Package
 
-### 📎 Supporting / Utility Folders
-- **`figs/`** – Figures for the paper.  
-- **`videos/`** – Code for generating videos of experiments.  
-- **`toy_models/`** – Code for generating simple visual diagrams (not full experiments).  
-- **`tests/`** – Legacy testing code (may be outdated).  
-- **`to_propagate/`** – Placeholder for revisions to common scripts (not currently in use).  
+**`minima_volume/`**
 
----
+This is the **main library** used across all experiments. It contains:
 
-## 🚀 How to Use
+* Models + Datasets (MLP, CNNs for MNIST, CIFAR10, etc.)
+* Dataset loading and preprocessing utilities
+* Training utilities (standard + SAM)
+* Random perturbations and volume estimation code
+* Analysis and plotting helpers
 
-Each **experiment folder** follows the same structure:
-
-### Template Folder
-- Contains Jupyter notebooks that serve as **experiment templates**.  
-- These allow you to:
-  - Copy and duplicate notebooks for new runs.  
-  - Swap hyperparameters and parameters.  
-  - Launch multiple experiments in sequence.  
-
-This setup is somewhat ad-hoc but enables quick iteration and scaling.
+All experiment folders import from here.
 
 ---
 
-### Base Folder
-The **base** folder contains the **important notebooks** for the experimental loop:
+### 🧪 Experiments
 
-- **Train Low Test Models.ipynb**  
-  - Imports models and datasets from `minima_volume`.  
-  - Trains models with varying dataset sizes.  
-  - Saves trained models alongside the dataset used.  
+**`experiments/`**
 
-- **Random Perturbs.ipynb**  
-  - Applies fixed random perturbations to model parameters.  
-  - Evaluates loss changes along those directions.  
-  - Purely random directions — no binary search or optimization.  
+This folder contains **all experimental pipelines**. Each subfolder corresponds to a **training regime or dataset**
 
-- **Volume Cutoff.ipynb**  
-  - Evaluates trained models on the dataset.  
-  - Determines when loss grows too large (often after encountering unseen data).  
+| Folder                | Description                                                           |
+| --------------------- | --------------------------------------------------------------------- |
+| `MNIST/`              | Standard MNIST experiments (MLP, CNN, low-data regimes, poisoning)    |
+| `CIFAR10/`            | CIFAR-10 experiments (low-data, CNN, poisoning.)                      |
+| `SVHN/`               | Experiments on street-view house numbers dataset                      |
+| `modulo_arithmetic/`  | modulo arithmetic (low data, high epoch and grokking)                 |
+| `swiss_roll/`         | swiss roll experiments                                                |
+| `imbalanced_classes/` | Experiments with class imbalanced datasets                            |
+| `sam/`                | Sharpness-Aware Minimization experiments                              |
 
-- **Volume Estimation Pipeline.ipynb**  
-  - Uses perturbation results to estimate when perturbations cross a cutoff.  
-  - Collects radii and computes approximate minima volumes.  
-
----
-
-### 🏗 Running New Experiments
-To run a new experiment:  
-
-1. **Select a template** from the template folder.  
-2. **Modify the notebooks** in the base folder:  
-   - Set the model architecture in:
-     - `Train Low Test Models.ipynb`  
-     - `Random Perturbs.ipynb`  
-     - `Volume Cutoff.ipynb`  
-   - Pass in the dataset to `Train Low Test Models.ipynb`.  
-3. **Run in sequence:**  
-   - Training →  
-   - Perturbations →  
-   - Cutoff evaluation →  
-   - Volume estimation  
-4. Results (models, perturbations, radii, figures) will be saved in the respective experiment folder.  
+> Each experiment subdirectory follows a **common workflow**:
+> train model → evaluate perturbations → estimate volume via cutoffs.
+> A dedicated README in `experiments/` explains this pipeline in detail.
 
 ---
 
-## 📊 Experiment Categories & Progress
+### 🎥 Landscape Visualizations
 
-✅ = Done 🔄 = Needs update ⬜ = Not started  
+**`videos/`**
 
-### 🧨 Poison Experiments
-- **Swiss Poison** 🔄 *(Update)*  
-  - x5 ✅  
-  - x6 ✅  
-- **MNIST Poison** ✅ 
-- **CIFAR Poison** ✅ *(Volume actually increased at 100 poison...)*  
-
-### 📉 Low Data Experiments
-- **Swiss Data**  
-  - x5 ✅  
-  - x6 ✅  
-- **MNIST Data**  
-  - Base ✅  
-  - Large ✅  
-- **MNIST CNN Data** 🔄 *(relationship is more mild than MLP)*  
-- **CIFAR Data**  
-  - Base ✅ 
-- **Modulo Arithmetic Data** 🔄 *(compare grokking later)*
-  - Base ✅
-  - High Epoch ✅
-
-
-### ⚡ SAM Experiments
-- **MNIST SAM Data** ✅  
-- **Swiss SAM Data** ✅
-
-### ⚡ Grokking Experiments
-- Not analyzed yet
-
-### ⚖️ Class Imbalance Experiments
-- **Class Imbalance MNIST** ⬜  
-- **Class Imbalance CIFAR** ⬜  
+Contains scripts for **rendering 2D / 3D visualizations** of the slices of the loss landscape.
+Not really related to the main volume work, but generates nice visuals.
 
 ---
 
-## 🖼 Figures & Videos
+### 🖼 Figures and Diagrams
 
-- All **figures** are in [`figs/`](figs/) for use in the paper.  
-- **Videos** can be generated via scripts in [`videos/`](videos/).  
+**`visualizations/`**
 
----
+Includes:
 
-## 📝 Notes
-
-- Some outdated code stored **models/datasets directly inside experiment folders**.  
-  - These have been updated to import from `minima_volume`.  
-- Random seeds are logged for reproducibility.  
+* Final figures used in the paper
+* Scripts for generating plots, summary graphs, and illustrative diagrams
 
 ---
 
-## 📜 License
+### 🧪 Tests (Legacy)
 
-[MIT License](LICENSE)
+**`tests/`**
+
+Contains older verification scripts for internal functionality.
+These are **not guaranteed to be up to date** and are not required to run experiments.
+
+---
+
+### 📦 Environment Configuration
+
+* **`requirements.txt`** — Quickly install required dependencies.
+* **`pyproject.toml`** — Allows package installation via `pip install -e .` for development.
