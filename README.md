@@ -3,6 +3,7 @@
 ### *Minima Volume Project (Code & Experiments)*
 
 **Paper:** Link (Currently N/A)
+
 **Tutorial Colab:** [Link](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd)
 
 ---
@@ -13,25 +14,24 @@
 
 ---
 
-This repository contains the **codebase and experiment pipelines** used in the paper **“Sharp Minima Can Generalize: A Loss Landscape Perspective on Data.”**
-It contains tools to measure **the volume of loss landscape minima** in different loss landscapes (formed by different datasets).
+This repository contains code and experiments for the paper **“Sharp Minima Can Generalize: A Loss Landscape Perspective on Data.”**
+It has tools to measure **the volume of loss landscape minima** in different loss landscapes (formed by different datasets).
 
-In the paper we primarily study minima trained on large datasets, observing how their volumes behave in smaller datasets and find results generally consistent with the volume hypothesis:
-the idea that minima found from training typically occupy much larger volumes than minima not found.
+In the paper we mainly study minima trained on large datasets, observing how their volumes behave in smaller datasets.
 However, our code can also study the volumes of minima from poisoned datasets (as was done in past experiments) and recreate past results on the effects of batch size on flatness and generalization.
 
-The central idea is to estimate **the size (or “volume”) of a minimum** by:
+The main idea is to estimate **the volume of a minimum** by:
 
 1. Training a model to reach a local minimum of the loss.
 2. Generating **random perturbations** to the model parameters.
 3. Measuring how far one can move in random directions before the loss exceeds a preset threshold.
-4. Using the distances to estimate the **volume** around the minimum.
+4. Estimate **volume** using the distances.
 
 ---
 
 ## 🎓 Quick Start (Recommended)
 
-To try a simple minima volume experiment in minutes, we recommend starting with the [**interactive Colab tutorial**](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd). 
+For a simple minima volume experiment, we recommend starting with the [**interactive Colab tutorial**](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd). 
 The tutorial estimates the volumes on MNIST. Experiments in our code are scalable versions of the same workflow.
 
 ---
@@ -50,7 +50,7 @@ This repository is missing:
 * Raw perturbation sweeps
 * Full datasets
 
-However, it includes the **final volume measurement results** used for the figures in the paper.
+However, it includes **volume results** used for the figures in the paper, letting you recreate the plots.
 If you wish to regenerate full experimental results, you will need to rerun the training and perturbation pipelines.
 
 ---

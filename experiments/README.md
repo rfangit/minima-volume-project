@@ -1,80 +1,44 @@
 # Experiments
 
-This directory contains all experiment pipelines used to generate the results in the paper.
-Each experiment folder corresponds to a **dataset or training regime** (e.g., MNIST, CIFAR10, SVHN, SAM, poisoning, class imbalance, etc.).
-All experiments follow the **same volume estimation workflow**, based on training models, generating perturbations, and measuring loss thresholds.
-
-The core logic for models, datasets, and perturbation routines lives in the **`minima_volume`** package, which all notebooks import from.
+Directory for experiments in the paper. Each folder contains a dataset or training regime, and follows the same workflow (train model, generate perturbations, measure loss threshold volumes).
 
 ---
 
-## 🧱 Standard Experiment Workflow
+## 🧱 Experiment Workflow
 
-Each experiment ultimately consists of running the following **four main notebooks** inside an **individual experiment run folder** (usually named something like `model_<seed>_data_<seed>`):
+Each experiment runs  **five notebooks** inside a folder (usually named something like `model_<seed>_data_<seed>`):
 
-| Notebook                             | Purpose                                                                                                                                                         |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Train Low Test Models.ipynb**      | Trains one or more models on a dataset configuration (e.g., low-data regime, poison ratio, architecture choice). Saves the trained weights + dataset splits.    |
-| **Random Perturbs.ipynb**            | Generates random perturbation directions in parameter space and evaluates the loss along those directions. No optimization—these are *fixed random* directions. |
-| **Volume Cutoff.ipynb**              | Determines the **loss threshold** beyond which a perturbation is considered to have “exited” the minimum region.                                                |
-| **Volume Estimation Pipeline.ipynb** | Uses the perturbation trajectories + cutoff estimates to compute an approximate **minimum volume** for each trained model.                                      |
+| Notebook                             | Purpose                                                                                                                                                      |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Train Low Test Models.ipynb**      | Trains models on a dataset configuration (e.g., low-data regime, poison ratio, architecture choice). Saves the trained weights + dataset splits.             |
+| **Random Perturbs.ipynb**            | Generates random perturbation directions and evaluates the perturbed model loss along those directions for a dataset. Fixed seeds for random perturbations.  |
+| **Volume Estimation Pipeline.ipynb** | Uses the loss along the perturbations + a user chosen cutoff to compute the  **minimum volume** for each trained model.                                      |
+| **Volume Cutoff.ipynb**              | Determines the dataset size at which a minima has 0 volume, purely for nicer looking graphs. Results are saved to cutoffs and visualized in loss_curves.png  |                                             |
+| **Test Accuracy.ipynb**              | Obtains the test accuracy of models and saves it in test_accuracies.npz. Used only for nicer looking graphs.                                                 |
 
-Additionally:
-
-| Notebook                | Purpose                                                                                                                                                  |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Test Accuracy.ipynb** | Computes and visualizes test accuracy across training configurations (e.g., dataset size, poison fraction). Useful for comparing volume vs. performance. |
+Only the first three really matter.
 
 ---
 
-## 📦 Folder Layout Pattern (Inside Each Dataset Folder)
+## Folder Naming Conventions
 
-```
-experiments/
-└── CIFAR10/                  # Example dataset experiment folder
-    ├── template/             # Base notebooks for creating new experiment runs
-    ├── low_data/             # (Example) experiment category
-    │   ├── base/             # Model architecture or training baseline
-    │   │   ├── model_0_data_0/
-    │   │   │   ├── Train Low Test Models.ipynb
-    │   │   │   ├── Random Perturbs.ipynb
-    │   │   │   ├── Volume Cutoff.ipynb
-    │   │   │   ├── Volume Estimation Pipeline.ipynb
-    │   │   │   └── Test Accuracy.ipynb
-    │   │   └── model_1_data_2/
-    │   │       └── ...
-    │   └── large/
-    │       └── ...
-    └── poison/
-        └── ...
-```
+* **Top-level experiment categories** = training condition (e.g., `low_data/`, `poison/`, `sam/`, etc.) + a template for making new experiments
+* **Subfolders** = different **architectures** or experiment variations (e.g., `base/`, `large/`), doesn't always exist
+* **Run folders** = individual model/data seed trials (e.g., `model_0_data_2/`) and the analysis folder, containing the final plots.
 
-### Naming Conventions
-
-* **Top-level experiment categories** = training condition (e.g., `low_data/`, `poison/`, `sam/`, etc.)
-* **Subfolders** = different **architectures** or experiment variations (e.g., `base/`, `large/`)
-* **Run folders** = individual model/data seed trials (e.g., `model_0_data_2/`)
-
-The exact meaning of folder names varies slightly by experiment, but the structure is consistent:
-→ *Each run folder contains the 4 core notebooks listed above.*
+The meaning of folder names varies slightly by experiment, but all run folders contain the 5 core notebooks.
 
 ---
 
-## 🏗 Creating a New Experiment
+## 🏗 Creating New Experiments
 
-1. **Start from the `template/` folder** in your dataset.
+1. If the model + dataset are not supported, you need to modify the 5 notebooks to use the architecture and dataset required. Else, start from a **`template/` folder**.
 2. Copy the template notebooks into a new experiment subfolder matching your setup.
-3. In:
-
-   * `Train Low Test Models.ipynb` → select model + dataset subset or corruption regime.
-   * `Random Perturbs.ipynb` and `Volume Cutoff.ipynb` → reference your trained model checkpoint.
-4. Run the notebooks in order:
+3. Run the five notebooks in sequence.
 
 ```
-Train Low Test Models → Random Perturbs → Volume Cutoff → Volume Estimation Pipeline
+Train Low Test Models → Random Perturbs → Volume Estimation Pipeline → Volume Cutoff → Test Accuracy
 ```
-
-5. (Optional) Use `Test Accuracy.ipynb` to analyze dataset-size vs. accuracy trends.
 
 ---
 
@@ -93,15 +57,15 @@ This section will describe:
 
 ## ⚙️ Batch + Automation Utilities (Optional / Advanced)
 
-Most experiment folders include helper notebooks/scripts for **running many experiments at once**, such as:
+Experiment folders also include helper notebooks/scripts for **running many experiments at once**, such as:
 
-| Script / Notebook                    | Purpose                                                            |
-| ------------------------------------ | ------------------------------------------------------------------ |
-| `full_pipeline.ipynb`                | Runs the entire workflow end-to-end in sequence.                   |
-| `make_dataset_notebooks.ipynb`       | Clones and configures run folders for multiple seeds / datasets.   |
-| `cleanup_files.ipynb`                | Removes large cached files to reclaim space.                       |
-| `propagate_file.ipynb`               | Copies a single file to all run directories (e.g., patch updates). |
-| `Run Random Perturbs Parallel.ipynb` | Parallelizes the perturbation step across runs.                    |
-| `Run Volume Parallel.ipynb`          | Parallelizes volume estimation.                                    |
+| Script / Notebook                    | Purpose                                                               |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| `full_pipeline.ipynb`                | Runs the entire workflow end-to-end in sequence.                      |
+| `make_dataset_notebooks.ipynb`       | Clones and run folders for multiple seeds / datasets.                 |
+| `cleanup_files.ipynb`                | Removes files in all experiments (eg, cleaning up datasets for space) |
+| `propagate_file.ipynb`               | Copies a single file to all run directories.                          |
+| `Run Random Perturbs Parallel.ipynb` | Parallelizes random perturbs across runs.                             |
+| `Run Volume Parallel.ipynb`          | Parallelizes volume estimation, test accuracy, volume cutoffs         |
 
 These tools are not required for small-scale experimentation, but they are helpful when scaling to dozens or hundreds of runs.
