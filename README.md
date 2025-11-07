@@ -8,7 +8,7 @@
 ---
 
 <p align="center">
-  <img src="videos/MNIST Video/plots_detailed/figure/combined_figure.png" width="600">
+  <img src="videos\combined_figure.png" width="600">
 </p>
 
 ---
