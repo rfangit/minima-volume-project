@@ -2,22 +2,20 @@
 
 ### *Minima Volume Project (Code & Experiments)*
 
-**Paper:** *Prepint Link Here*
-**Tutorial Colab:** *Colab Link Here*
+**Paper:** Link (Currently N/A)
+**Tutorial Colab:** [Link](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd)
 
 ---
 
 <p align="center">
-  <em>Insert main paper figure here (e.g., volume vs. performance graph)</em>  
-  <br>
-  <strong>[ TODO: Add image ]</strong>
+  <img src="videos/MNIST Video/plots_detailed/figure/combined_figure.png" width="600">
 </p>
 
 ---
 
 This repository contains the **codebase and experiment pipelines** used in the paper **“Sharp Minima Can Generalize: A Loss Landscape Perspective on Data.”**
 It contains tools to measure **the volume of loss landscape minima** in different loss landscapes (formed by different datasets).
-The volumes are interesting to study because of the flat minima hypothesis and the volume hypothesis.
+
 In the paper we primarily study minima trained on large datasets, observing how their volumes behave in smaller datasets and find results generally consistent with the volume hypothesis:
 the idea that minima found from training typically occupy much larger volumes than minima not found.
 However, our code can also study the volumes of minima from poisoned datasets (as was done in past experiments) and recreate past results on the effects of batch size on flatness and generalization.
@@ -33,8 +31,8 @@ The central idea is to estimate **the size (or “volume”) of a minimum** by:
 
 ## 🎓 Quick Start (Recommended)
 
-To try a simple minima volume experiment in minutes, we recommend starting with the **interactive Colab tutorial**.
-This walkthrough demonstrates the **entire estimation pipeline** on MNIST, and the experiment folders in this repository are **structured as scalable versions** of the same workflow.
+To try a simple minima volume experiment in minutes, we recommend starting with the [**interactive Colab tutorial**](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd). 
+The tutorial estimates the volumes on MNIST. Experiments in our code are scalable versions of the same workflow.
 
 ---
 
@@ -46,14 +44,14 @@ This walkthrough demonstrates the **entire estimation pipeline** on MNIST, and t
 * Plotting utilities used to generate figures in the paper
 
 **Note:**
-This repository **does not** include:
+This repository is missing:
 
 * Final trained models
 * Raw perturbation sweeps
 * Full datasets
 
-However, it **does include** the **final volume measurement results** used for the figures in the paper.
-If you wish to regenerate full experimental results, you will need to **rerun the training and perturbation pipelines**.
+However, it includes the **final volume measurement results** used for the figures in the paper.
+If you wish to regenerate full experimental results, you will need to rerun the training and perturbation pipelines.
 
 ---
 

@@ -10,6 +10,7 @@
 # Ignore all .pt, .png, and .npz files
 **/*.pt
 **/*.png
+!videos\MNIST Video\plots_detailed\figure\combined_figure.png
 **/*.npz
 
 # Ignore perturb_probs folders
