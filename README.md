@@ -2,7 +2,7 @@
 
 ### *Minima Volume Project (Code & Experiments)*
 
-**Paper:** Link (Currently N/A)
+**Paper:** (Coming Soon!)
 
 **Tutorial Colab:** [Link](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd)
 
@@ -49,6 +49,8 @@ This repository is missing:
 * Final trained models
 * Raw perturbation sweeps
 * Full datasets
+
+This is intentional to keep repository size manageable.
 
 However, it includes **volume results** used for the figures in the paper, letting you recreate the plots.
 If you wish to regenerate full experimental results, you will need to rerun the training and perturbation pipelines.
