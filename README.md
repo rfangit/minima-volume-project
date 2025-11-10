@@ -2,7 +2,7 @@
 
 ### *Minima Volume Project (Code & Experiments)*
 
-**Paper:** (Coming Soon!)
+**Paper:** [Link](https://arxiv.org/pdf/2511.04808)
 
 **Tutorial Colab:** [Link](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd)
 
