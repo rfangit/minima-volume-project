@@ -4,6 +4,10 @@
 
 **Paper:** [Link](https://arxiv.org/pdf/2511.04808)
 
+**Blog:** [Link](https://rfangit.github.io/blog/2025/minima_volumes_sharp/)
+
+**Video Summary:** [Link](https://youtu.be/32uYplNb2Bo)
+
 **Tutorial Colab:** [Link](https://colab.research.google.com/drive/1JNbk8Sau-M31mLVOQv19GR2dlwW7xwLd)
 
 ---
