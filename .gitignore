@@ -11,6 +11,7 @@
 **/*.pt
 **/*.png
 !videos/combined_figure.png
+!nanogpt/assets/*.png
 **/*.npz
 
 # Ignore perturb_probs folders
