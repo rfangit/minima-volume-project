@@ -19,3 +19,6 @@
 
 # Ignore Python cache
 __pycache__/
+
+# uv-managed virtualenv
+.venv/
