@@ -1,0 +1,12 @@
+[train q=950] device=cuda
+number of parameters: 10.65M
+[train q=950] N=1000 batch=64 params=10,745,088
+Epoch 1/800: Train Loss 3.5470 | Test Loss 3.3672 | accs Train 0.1166 Test 0.1487
+Epoch 160/800: Train Loss 0.0648 | Test Loss 5.2224 | accs Train 0.9788 Test 0.3936
+Epoch 320/800: Train Loss 0.0336 | Test Loss 5.8058 | accs Train 0.9885 Test 0.4030
+Epoch 480/800: Train Loss 0.0272 | Test Loss 5.9899 | accs Train 0.9905 Test 0.4029
+Epoch 640/800: Train Loss 0.0247 | Test Loss 6.0427 | accs Train 0.9914 Test 0.4070
+Epoch 800/800: Train Loss 0.0222 | Test Loss 6.2350 | accs Train 0.9919 Test 0.4059
+[train q=950] training done in 433.9s, final train_loss=0.0222
+✅ Model saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_950.pt
+[train q=950] saved

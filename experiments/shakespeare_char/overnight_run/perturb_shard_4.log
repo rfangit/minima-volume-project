@@ -1,0 +1,186 @@
+[perturb shard=4] device=cuda seeds=[101, 125]  (25 dirs)
+number of parameters: 10.65M
+Looking for models and dataset in: /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data
+Found 5 model files:
+  - model_additional_19950.pt
+  - model_additional_4950.pt
+  - model_additional_950.pt
+  - model_additional_200.pt
+  - model_additional_0.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_19950.pt
+Successfully loaded: model_additional_19950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_4950.pt
+Successfully loaded: model_additional_4950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_950.pt
+Successfully loaded: model_additional_950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_200.pt
+Successfully loaded: model_additional_200.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/model_additional_0.pt
+Successfully loaded: model_additional_0.pt
+
+Model data loaded from all models:
+Model 0 (model_additional_19950.pt):
+  - Additional data: 19950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 1 (model_additional_4950.pt):
+  - Additional data: 4950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 2 (model_additional_950.pt):
+  - Additional data: 950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 3 (model_additional_200.pt):
+  - Additional data: 200
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 4 (model_additional_0.pt):
+  - Additional data: 0
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+
+Loading dataset...
+Using dataset file: dataset.pt
+✅ Dataset loaded from /root/minima-volume-project/experiments/shakespeare_char/overnight_run/models_and_data/dataset.pt
+Testing on data with 0 samples - 25 directions
+Testing model trained on 19950 additional data.
+Loss: 4.5577
+Accs: 0.5015
+Wiggle completed in 23.64 seconds for data model trained with 19950 samples
+  Total perturbation time: 1.29 s
+  Total forward/metric time: 22.19 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_0
+
+Testing model trained on 4950 additional data.
+Loss: 4.9047
+Accs: 0.4851
+Wiggle completed in 23.44 seconds for data model trained with 4950 samples
+  Total perturbation time: 1.29 s
+  Total forward/metric time: 22.01 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_0
+
+Testing model trained on 950 additional data.
+Loss: 6.2350
+Accs: 0.4059
+Wiggle completed in 23.40 seconds for data model trained with 950 samples
+  Total perturbation time: 1.30 s
+  Total forward/metric time: 21.97 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_0
+
+Testing model trained on 200 additional data.
+Loss: 8.3205
+Accs: 0.1811
+Wiggle completed in 23.55 seconds for data model trained with 200 samples
+  Total perturbation time: 1.34 s
+  Total forward/metric time: 22.00 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_0
+
+Testing model trained on 0 additional data.
+Loss: 8.0656
+Accs: 0.1532
+Wiggle completed in 23.48 seconds for data model trained with 0 samples
+  Total perturbation time: 1.31 s
+  Total forward/metric time: 21.98 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_0
+
+Testing on data with 200 samples - 25 directions
+Testing model trained on 19950 additional data.
+Loss: 4.5577
+Accs: 0.5015
+Wiggle completed in 105.65 seconds for data model trained with 19950 samples
+  Total perturbation time: 1.36 s
+  Total forward/metric time: 104.11 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_200
+
+Testing model trained on 4950 additional data.
+Loss: 4.9047
+Accs: 0.4851
+Wiggle completed in 105.16 seconds for data model trained with 4950 samples
+  Total perturbation time: 1.35 s
+  Total forward/metric time: 103.66 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_200
+
+Testing model trained on 950 additional data.
+Loss: 6.2350
+Accs: 0.4059
+Wiggle completed in 104.99 seconds for data model trained with 950 samples
+  Total perturbation time: 1.32 s
+  Total forward/metric time: 103.53 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_200
+
+Testing model trained on 200 additional data.
+Loss: 8.3205
+Accs: 0.1811
+Wiggle completed in 105.03 seconds for data model trained with 200 samples
+  Total perturbation time: 1.32 s
+  Total forward/metric time: 103.56 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_200
+
+Testing model trained on 0 additional data.
+Testing on data with 950 samples - 25 directions
+Testing model trained on 19950 additional data.
+Loss: 4.5577
+Accs: 0.5015
+Wiggle completed in 414.17 seconds for data model trained with 19950 samples
+  Total perturbation time: 1.39 s
+  Total forward/metric time: 412.63 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_950
+
+Testing model trained on 4950 additional data.
+Loss: 4.9047
+Accs: 0.4851
+Wiggle completed in 414.36 seconds for data model trained with 4950 samples
+  Total perturbation time: 1.37 s
+  Total forward/metric time: 412.84 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_950
+
+Testing model trained on 950 additional data.
+Loss: 6.2350
+Accs: 0.4059
+Wiggle completed in 414.46 seconds for data model trained with 950 samples
+  Total perturbation time: 1.38 s
+  Total forward/metric time: 412.93 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_950
+
+Testing model trained on 200 additional data.
+Testing model trained on 0 additional data.
+Testing on data with 4950 samples - 25 directions
+Testing model trained on 19950 additional data.
+Loss: 4.5577
+Accs: 0.5015
+Wiggle completed in 2065.61 seconds for data model trained with 19950 samples
+  Total perturbation time: 1.54 s
+  Total forward/metric time: 2063.90 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_4950
+
+Testing model trained on 4950 additional data.
+Loss: 4.9047
+Accs: 0.4851
+Wiggle completed in 2066.25 seconds for data model trained with 4950 samples
+  Total perturbation time: 1.53 s
+  Total forward/metric time: 2064.52 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_4950
+
+Testing model trained on 950 additional data.
+Testing model trained on 200 additional data.
+Testing model trained on 0 additional data.
+Testing on data with 19950 samples - 25 directions
+Testing model trained on 19950 additional data.
+Loss: 4.5577
+Accs: 0.5015
+Wiggle completed in 8254.28 seconds for data model trained with 19950 samples
+  Total perturbation time: 1.63 s
+  Total forward/metric time: 8252.47 s
+Saved to /root/minima-volume-project/experiments/shakespeare_char/overnight_run/shard_4/data_19950
+
+Testing model trained on 4950 additional data.
+Testing model trained on 950 additional data.
+Testing model trained on 200 additional data.
+Testing model trained on 0 additional data.
+[perturb shard=4] DONE
