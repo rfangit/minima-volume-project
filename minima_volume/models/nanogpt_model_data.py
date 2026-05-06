@@ -182,8 +182,19 @@ def loss_fn(logits, targets):
     return F.cross_entropy(logits.reshape(-1, logits.size(-1)), targets.reshape(-1))
 
 
+def loss_fn_per_sample(logits, targets):
+    """Per-window mean cross-entropy. logits (B,T,V), targets (B,T) -> (B,)."""
+    B, T, V = logits.shape
+    tok = F.cross_entropy(logits.reshape(-1, V), targets.reshape(-1), reduction="none")
+    return tok.view(B, T).mean(dim=1)
+
+
 def get_loss_fn():
     return loss_fn
+
+
+def get_loss_fn_per_sample():
+    return loss_fn_per_sample
 
 
 def accuracy_fn(logits, targets):
