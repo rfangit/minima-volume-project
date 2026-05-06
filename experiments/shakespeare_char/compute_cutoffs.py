@@ -8,6 +8,7 @@ full training pool (base + max additional windows) and writes
 `analysis_funcs.find_cutoff_index` consumes to draw the L > M cliff in the
 "Minima Volumes Across Datasets" plot.
 """
+import argparse
 import json
 import os
 from pathlib import Path
@@ -18,12 +19,16 @@ from minima_volume.dataset_funcs import load_models_and_data, tensor_to_list
 from minima_volume.perturb_funcs import cumulative_average_loss_curve
 from minima_volume.models import nanogpt_model_data as model_module
 
-OUTPUT_DIR = Path(__file__).resolve().parent / "overnight_run"
-SEED_DIR = OUTPUT_DIR  # single-seed: treat overnight_run itself as the seed dir
 BATCH_SIZE = 64  # block_size=256 → 64*256=16K tokens/batch fits comfortably
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--seed-dir", type=Path, required=True,
+                        help="Path to a model_<i>_data_<j> seed directory.")
+    args = parser.parse_args()
+    SEED_DIR = args.seed_dir.resolve()
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     template = model_module.get_model(device=device, seed=0)

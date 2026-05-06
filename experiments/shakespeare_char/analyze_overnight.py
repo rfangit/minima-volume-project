@@ -36,7 +36,7 @@ from minima_volume.analysis_funcs import (
 )
 
 PROBLEM_NAME = "Shakespeare-char nanoGPT"
-SEED_DIR_NAME = "overnight_run"  # treated as one experiment folder
+EXPERIMENT_ROOT = "overnight_run"  # contains model_<i>_data_<j>/ children
 DATASET_QUANTITIES = [0, 200, 950, 4950, 19950]
 BASE_TRAIN_SIZE = 50
 
@@ -49,17 +49,23 @@ def main():
     loss_value = args.loss_value
 
     here = Path(__file__).resolve().parent
-    os.chdir(here)  # base_dir defaults relative to cwd
+    expt_root = here / EXPERIMENT_ROOT
+    os.chdir(expt_root)  # analysis_funcs uses cwd-relative paths
 
-    seed_dir = here / SEED_DIR_NAME
-    base_output_dir = seed_dir / "analysis"
+    base_output_dir = expt_root / "analysis"
     base_output_dir.mkdir(parents=True, exist_ok=True)
 
-    experiment_folders = [SEED_DIR_NAME]
+    experiment_folders = sorted(
+        p.name for p in expt_root.iterdir()
+        if p.is_dir() and p.name.startswith("model_")
+    )
+    if not experiment_folders:
+        raise SystemExit(f"no model_*_data_* seed folders found under {expt_root}")
     data_modifications = [f"data_{q}" for q in DATASET_QUANTITIES]
     model_data_sizes = list(DATASET_QUANTITIES)
     base_train_size = BASE_TRAIN_SIZE
     base_shift = base_train_size  # for "data_*" type
+    print(f"seeds: {experiment_folders}")
 
     print(f"problem={PROBLEM_NAME}  loss_value={loss_value}")
     print(f"seed_dir={seed_dir}")
@@ -116,9 +122,10 @@ def main():
         target_model_data_levels=model_data_sizes,
         loss_value=loss_value,
         experiment_folders=experiment_folders,
+        base_dir=str(expt_root),
     )
     results_with_cutoff = append_cutoff_points(
-        results_dict, threshold=loss_value, base_dir=str(here)
+        results_dict, threshold=loss_value, base_dir=str(expt_root)
     )
     save_results_dict_npz(results_with_cutoff,
                           str(base_output_dir / "volumes_across_datasets.npz"))

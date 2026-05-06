@@ -54,8 +54,15 @@ from minima_volume.models import nanogpt_model_data as model_module
 
 
 # --- Config -----------------------------------------------------------------
-DATA_SEED = 1
-MODEL_SEED = 1
+# Per-seed knobs are env-overridable so multiseed_run.py can spawn this
+# script with different (seed, output dir, GPU pool) without code edits.
+def _envcfg(name, default, cast=str):
+    val = os.environ.get(f"OVN_{name}")
+    return cast(val) if val is not None else default
+
+
+DATA_SEED = _envcfg("DATA_SEED", 1, int)
+MODEL_SEED = _envcfg("MODEL_SEED", 1, int)
 BASE_DATA_SIZE = 50
 
 # 50, 250, 1000, 5000, 20000 windows total -- 400x span (paper used 1000x for MNIST)
@@ -67,10 +74,11 @@ TRAIN_BATCH_SIZE = 64
 LR = 1e-3
 WEIGHT_DECAY = 1e-1
 
-NUM_DIRECTIONS = 200
+NUM_DIRECTIONS = _envcfg("NUM_DIRECTIONS", 200, int)
 N_COEFFS = 100
 MAX_COEFF = 0.05
-PERTURBATION_SEED_BASE = 1
+# Bumped per-seed by multiseed_run so two seeds don't share direction seeds.
+PERTURBATION_SEED_BASE = _envcfg("PERTURBATION_SEED_BASE", 1, int)
 EVAL_BATCH_SIZE = 64
 
 # Wider threshold ladder than cheap_run -- larger landscapes may not converge
@@ -78,10 +86,13 @@ EVAL_BATCH_SIZE = 64
 LOSS_THRESHOLDS = [2.0, 1.0, 0.5, 0.1, 0.05]
 ACC_THRESHOLDS = [0.5, 0.7, 0.85, 0.9, 0.95]
 
-NUM_TRAIN_GPUS = 5  # one per dataset size
-NUM_PERTURB_GPUS = 8
+NUM_TRAIN_GPUS = _envcfg("NUM_TRAIN_GPUS", 5, int)  # one per dataset size
+NUM_PERTURB_GPUS = _envcfg("NUM_PERTURB_GPUS", 8, int)
+# Physical GPU index to add when spawning workers; lets us pin a run to GPUs 2..7.
+GPU_OFFSET = _envcfg("GPU_OFFSET", 0, int)
 
-OUTPUT_DIR = Path(__file__).resolve().parent / "overnight_run"
+OUTPUT_DIR = Path(_envcfg("OUTPUT_DIR",
+                          str(Path(__file__).resolve().parent / "overnight_run")))
 
 
 # --- Worker entrypoints (run inside subprocess with CUDA_VISIBLE_DEVICES set) -
@@ -222,23 +233,44 @@ def _spawn_subprocess(self_arg: str, val: int, gpu_id: int, log_path: Path):
 
 
 def stage_train_orchestrator():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    procs = []
-    print(f"[train] spawning {len(DATASET_QUANTITIES)} workers on GPUs 0..{NUM_TRAIN_GPUS-1}")
-    for i, q in enumerate(DATASET_QUANTITIES):
-        gpu = i % NUM_TRAIN_GPUS
-        log_path = OUTPUT_DIR / f"train_q{q}.log"
-        p, log = _spawn_subprocess("--train-one", q, gpu, log_path)
-        procs.append((p, log, q, gpu))
-        print(f"[train] q={q} -> cuda:{gpu}, log={log_path.name}, pid={p.pid}")
+    """Train each dataset size; never put two workers on the same GPU.
 
+    With NUM_TRAIN_GPUS < len(DATASET_QUANTITIES) (e.g. 3 GPUs / 5 sizes),
+    a per-GPU thread pulls from a shared queue. Longest-processing-time-first
+    ordering keeps the q=19950 monster on its own GPU end-to-end.
+    """
+    import threading
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    job_queue = sorted(DATASET_QUANTITIES, reverse=True)  # largest first
+    queue_lock = threading.Lock()
     failed = []
-    for p, log, q, gpu in procs:
-        rc = p.wait()
-        log.close()
-        print(f"[train] q={q} (cuda:{gpu}) exit={rc}")
-        if rc != 0:
-            failed.append(q)
+    failed_lock = threading.Lock()
+
+    gpu_lo, gpu_hi = GPU_OFFSET, GPU_OFFSET + NUM_TRAIN_GPUS - 1
+    print(f"[train] {len(job_queue)} jobs on GPUs {gpu_lo}..{gpu_hi} (LPT-first)")
+
+    def gpu_worker(gpu: int):
+        while True:
+            with queue_lock:
+                if not job_queue:
+                    return
+                q = job_queue.pop(0)
+            log_path = OUTPUT_DIR / f"train_q{q}.log"
+            p, log = _spawn_subprocess("--train-one", q, gpu, log_path)
+            print(f"[train] q={q} -> cuda:{gpu}, log={log_path.name}, pid={p.pid}")
+            rc = p.wait()
+            log.close()
+            print(f"[train] q={q} (cuda:{gpu}) exit={rc}")
+            if rc != 0:
+                with failed_lock:
+                    failed.append(q)
+
+    threads = [threading.Thread(target=gpu_worker, args=(GPU_OFFSET + i,))
+               for i in range(NUM_TRAIN_GPUS)]
+    for t in threads: t.start()
+    for t in threads: t.join()
+
     if failed:
         print(f"[train] FAILED: {failed} -- aborting")
         sys.exit(1)
@@ -247,12 +279,14 @@ def stage_train_orchestrator():
 def stage_perturb_orchestrator():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     procs = []
-    print(f"[perturb] spawning {NUM_PERTURB_GPUS} workers on GPUs 0..{NUM_PERTURB_GPUS-1}")
+    gpu_lo, gpu_hi = GPU_OFFSET, GPU_OFFSET + NUM_PERTURB_GPUS - 1
+    print(f"[perturb] spawning {NUM_PERTURB_GPUS} workers on GPUs {gpu_lo}..{gpu_hi}")
     for i in range(NUM_PERTURB_GPUS):
+        gpu = GPU_OFFSET + i
         log_path = OUTPUT_DIR / f"perturb_shard_{i}.log"
-        p, log = _spawn_subprocess("--perturb-one", i, i, log_path)
+        p, log = _spawn_subprocess("--perturb-one", i, gpu, log_path)
         procs.append((p, log, i))
-        print(f"[perturb] shard_{i} -> cuda:{i}, log={log_path.name}, pid={p.pid}")
+        print(f"[perturb] shard_{i} -> cuda:{gpu}, log={log_path.name}, pid={p.pid}")
 
     failed = []
     for p, log, i in procs:
