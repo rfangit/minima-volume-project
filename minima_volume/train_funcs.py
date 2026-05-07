@@ -102,18 +102,22 @@ def evaluate(model, x_test, y_test, loss_fn, metrics, batch_size=1000):
     return avg_loss, metric_results
 
 # ----- Main Training Loop -----
-def train(model, x_train, y_train, x_test, y_test, loss_fn, metrics, optimizer, 
-          epochs, batch_size=1000, verbose_every=1, randperm_indices=True):
+def train(model, x_train, y_train, x_test, y_test, loss_fn, metrics, optimizer,
+          epochs, batch_size=1000, verbose_every=1, randperm_indices=True,
+          scheduler=None):
     train_loss_arr, test_loss_arr = [], []
     train_metrics_history = []  # list of dicts per epoch
     test_metrics_history = []
 
     for epoch in range(epochs):
         train_loss, train_metrics = train_one_epoch(
-            model, x_train, y_train, loss_fn, metrics, optimizer, 
+            model, x_train, y_train, loss_fn, metrics, optimizer,
             batch_size=batch_size, randperm_indices=randperm_indices
         )
         test_loss, test_metrics = evaluate(model, x_test, y_test, loss_fn, metrics, batch_size=batch_size)
+
+        if scheduler is not None:
+            scheduler.step()
 
         train_loss_arr.append(train_loss)
         test_loss_arr.append(test_loss)
@@ -123,9 +127,10 @@ def train(model, x_train, y_train, x_test, y_test, loss_fn, metrics, optimizer,
         if (epoch + 1) % verbose_every == 0 or epoch == 0 or epoch == epochs - 1:
             metrics_str = ""
             if metrics:
-                metrics_str = " | " + " | ".join([f"{name} Train {train_metrics[name]:.4f} Test {test_metrics[name]:.4f}" 
+                metrics_str = " | " + " | ".join([f"{name} Train {train_metrics[name]:.4f} Test {test_metrics[name]:.4f}"
                                                    for name in metrics])
-            print(f"Epoch {epoch+1}/{epochs}: Train Loss {train_loss:.4f} | Test Loss {test_loss:.4f}{metrics_str}")
+            lr_str = f" | LR {optimizer.param_groups[0]['lr']:.2e}" if scheduler is not None else ""
+            print(f"Epoch {epoch+1}/{epochs}: Train Loss {train_loss:.4f} | Test Loss {test_loss:.4f}{metrics_str}{lr_str}")
 
     return train_loss_arr, train_metrics_history, test_loss_arr, test_metrics_history
 

@@ -69,13 +69,17 @@ BASE_DATA_SIZE = 50
 DATASET_QUANTITIES = [0, 200, 950, 4950, 19950]
 DATASET_TYPE = "data"
 
-EPOCHS = 800
+EPOCHS = _envcfg("EPOCHS", 800, int)
 TRAIN_BATCH_SIZE = 64
-LR = 1e-3
+LR = float(_envcfg("LR", 1e-3, float))
 WEIGHT_DECAY = 1e-1
+# Anneal AdamW LR to this floor over EPOCHS epochs to break through the
+# constant-LR SGD noise floor that pins q=4950/19950 above zero. Set to 0
+# (or the same as LR) to disable cosine and recover constant-LR behavior.
+COSINE_MIN_LR = float(_envcfg("COSINE_MIN_LR", 0.0, float))
 
 NUM_DIRECTIONS = _envcfg("NUM_DIRECTIONS", 200, int)
-N_COEFFS = 100
+N_COEFFS = _envcfg("N_COEFFS", 100, int)
 MAX_COEFF = 0.05
 # Bumped per-seed by multiseed_run so two seeds don't share direction seeds.
 PERTURBATION_SEED_BASE = _envcfg("PERTURBATION_SEED_BASE", 1, int)
@@ -123,12 +127,18 @@ def stage_train_one(quantity: int):
     opt = optim.AdamW(
         model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY, betas=(0.9, 0.95),
     )
+    scheduler = None
+    if COSINE_MIN_LR > 0 and COSINE_MIN_LR < LR:
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(
+            opt, T_max=EPOCHS, eta_min=COSINE_MIN_LR,
+        )
     bs = min(len(x_train), TRAIN_BATCH_SIZE)
 
     loss_fn = model_module.get_loss_fn()
     other_metrics = model_module.get_additional_metrics()
 
-    print(f"[train q={quantity}] N={len(x_train)} batch={bs} params={n_params:,}")
+    print(f"[train q={quantity}] N={len(x_train)} batch={bs} params={n_params:,} "
+          f"lr={LR} cosine_min={COSINE_MIN_LR if scheduler else 'off'}")
     t0 = time.time()
     tr_loss, tr_metrics, te_loss, te_metrics = train_loop(
         model=model,
@@ -137,7 +147,8 @@ def stage_train_one(quantity: int):
         loss_fn=loss_fn, metrics=other_metrics, optimizer=opt,
         epochs=EPOCHS,
         batch_size=bs,
-        verbose_every=max(EPOCHS // 5, 1),
+        verbose_every=max(EPOCHS // 10, 1),
+        scheduler=scheduler,
     )
     print(f"[train q={quantity}] training done in {time.time()-t0:.1f}s, "
           f"final train_loss={tr_loss[-1]:.4f}")

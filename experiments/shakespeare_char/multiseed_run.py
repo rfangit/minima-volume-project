@@ -19,34 +19,40 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-EXPT_ROOT = HERE / "overnight_run"
+EXPT_ROOT = HERE / "cosine_run"  # new dir; preserves the constant-LR overnight_run/
 OVERNIGHT = HERE / "overnight_run.py"
 COMPUTE_CUTOFFS = HERE / "compute_cutoffs.py"
 
-# Seed 1 (model=1, data=1, 200 dirs) is already done in overnight_run/model_1_data_1/.
-# Add two new seeds, each pinned to 3 GPUs, with non-overlapping perturbation
-# direction seed ranges (200 used by seed 1; seed 2 uses 201–300; seed 3: 301–400).
+# 3 cosine seeds in parallel, 2 GPUs each on (2-3, 4-5, 6-7). Cosine-LR
+# decay 1e-3 → 1e-5 over 800 epochs to escape the constant-LR SGD noise
+# floor. Reduced (50 dirs, 50 coeffs) to fit the deadline; per-seed
+# wall ~4.15hr (2.2 train + 1.94 perturb).
+_COSINE_ENV = {
+    "OVN_LR": "1e-3",
+    "OVN_COSINE_MIN_LR": "1e-5",
+    "OVN_EPOCHS": "800",
+    "OVN_N_COEFFS": "50",
+}
 SEED_CONFIGS = [
     {
+        "label": "seed1",
+        "model_seed": 1, "data_seed": 1,
+        "num_directions": 50, "perturbation_seed_base": 1,
+        "gpu_offset": 2, "num_train_gpus": 2, "num_perturb_gpus": 2,
+        "output_dir": EXPT_ROOT / "model_1_data_1",
+    },
+    {
         "label": "seed2",
-        "model_seed": 2,
-        "data_seed": 2,
-        "num_directions": 100,
-        "perturbation_seed_base": 201,
-        "gpu_offset": 2,
-        "num_train_gpus": 3,
-        "num_perturb_gpus": 3,
+        "model_seed": 2, "data_seed": 2,
+        "num_directions": 50, "perturbation_seed_base": 51,
+        "gpu_offset": 4, "num_train_gpus": 2, "num_perturb_gpus": 2,
         "output_dir": EXPT_ROOT / "model_2_data_2",
     },
     {
         "label": "seed3",
-        "model_seed": 3,
-        "data_seed": 3,
-        "num_directions": 100,
-        "perturbation_seed_base": 301,
-        "gpu_offset": 5,
-        "num_train_gpus": 3,
-        "num_perturb_gpus": 3,
+        "model_seed": 3, "data_seed": 3,
+        "num_directions": 50, "perturbation_seed_base": 101,
+        "gpu_offset": 6, "num_train_gpus": 2, "num_perturb_gpus": 2,
         "output_dir": EXPT_ROOT / "model_3_data_3",
     },
 ]
@@ -55,6 +61,7 @@ SEED_CONFIGS = [
 def _spawn(cfg):
     cfg["output_dir"].mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
+    env.update(_COSINE_ENV)
     env.update({
         "OVN_DATA_SEED": str(cfg["data_seed"]),
         "OVN_MODEL_SEED": str(cfg["model_seed"]),

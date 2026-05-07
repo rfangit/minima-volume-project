@@ -36,7 +36,7 @@ from minima_volume.analysis_funcs import (
 )
 
 PROBLEM_NAME = "Shakespeare-char nanoGPT"
-EXPERIMENT_ROOT = "overnight_run"  # contains model_<i>_data_<j>/ children
+DEFAULT_EXPERIMENT_ROOT = "overnight_run"  # contains model_<i>_data_<j>/ children
 DATASET_QUANTITIES = [0, 200, 950, 4950, 19950]
 BASE_TRAIN_SIZE = 50
 
@@ -45,14 +45,23 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--loss-value", type=float, default=0.5,
                         help="Loss threshold (must match a directory loss_<th>/).")
+    parser.add_argument("--experiment-root", default=DEFAULT_EXPERIMENT_ROOT,
+                        help="Subdir of experiments/shakespeare_char/ containing model_*_data_*/ seeds.")
+    parser.add_argument("--exclude-q", type=int, nargs="*", default=[],
+                        help="Quantity values (q) to exclude from both axes — drops "
+                             "the model AND the landscape for each listed q. e.g. "
+                             "`--exclude-q 0` to omit the 50-example point.")
+    parser.add_argument("--out-suffix", default="",
+                        help="Suffix appended to the analysis output dir.")
     args = parser.parse_args()
     loss_value = args.loss_value
+    exclude = set(args.exclude_q)
 
     here = Path(__file__).resolve().parent
-    expt_root = here / EXPERIMENT_ROOT
+    expt_root = here / args.experiment_root
     os.chdir(expt_root)  # analysis_funcs uses cwd-relative paths
 
-    base_output_dir = expt_root / "analysis"
+    base_output_dir = expt_root / f"analysis{args.out_suffix}"
     base_output_dir.mkdir(parents=True, exist_ok=True)
 
     experiment_folders = sorted(
@@ -61,14 +70,13 @@ def main():
     )
     if not experiment_folders:
         raise SystemExit(f"no model_*_data_* seed folders found under {expt_root}")
-    data_modifications = [f"data_{q}" for q in DATASET_QUANTITIES]
-    model_data_sizes = list(DATASET_QUANTITIES)
+    quantities = [q for q in DATASET_QUANTITIES if q not in exclude]
+    data_modifications = [f"data_{q}" for q in quantities]
+    model_data_sizes = list(quantities)
     base_train_size = BASE_TRAIN_SIZE
     base_shift = base_train_size  # for "data_*" type
     print(f"seeds: {experiment_folders}")
-
-    print(f"problem={PROBLEM_NAME}  loss_value={loss_value}")
-    print(f"seed_dir={seed_dir}")
+    print(f"problem={PROBLEM_NAME}  loss_value={loss_value}  excluded q={sorted(exclude)}")
     print(f"data_modifications={data_modifications}")
     print(f"model_data_sizes={model_data_sizes}")
 
