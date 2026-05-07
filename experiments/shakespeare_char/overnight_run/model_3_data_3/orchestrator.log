@@ -1,0 +1,16 @@
+[train] 5 jobs on GPUs 5..7 (LPT-first)
+[train] q=19950 -> cuda:5, log=train_q19950.log, pid=97794
+[train] q=4950 -> cuda:6, log=train_q4950.log, pid=97798
+[train] q=950 -> cuda:7, log=train_q950.log, pid=97800
+[train] q=950 (cuda:7) exit=0
+[train] q=200 -> cuda:7, log=train_q200.log, pid=98458
+[train] q=200 (cuda:7) exit=0
+[train] q=0 -> cuda:7, log=train_q0.log, pid=98655
+[train] q=0 (cuda:7) exit=0
+[train] q=4950 (cuda:6) exit=0
+[train] q=19950 (cuda:5) exit=0
+[train] elapsed 8047.2s
+[perturb] spawning 3 workers on GPUs 5..7
+[perturb] shard_0 -> cuda:5, log=perturb_shard_0.log, pid=105419
+[perturb] shard_1 -> cuda:6, log=perturb_shard_1.log, pid=105420
+[perturb] shard_2 -> cuda:7, log=perturb_shard_2.log, pid=105421
