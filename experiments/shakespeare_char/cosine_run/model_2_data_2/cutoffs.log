@@ -1,0 +1,56 @@
+number of parameters: 10.65M
+Looking for models and dataset in: /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data
+Found 5 model files:
+  - model_additional_19950.pt
+  - model_additional_4950.pt
+  - model_additional_950.pt
+  - model_additional_200.pt
+  - model_additional_0.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_19950.pt
+Successfully loaded: model_additional_19950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_4950.pt
+Successfully loaded: model_additional_4950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_950.pt
+Successfully loaded: model_additional_950.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_200.pt
+Successfully loaded: model_additional_200.pt
+✅ Model loaded into provided instance from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_0.pt
+Successfully loaded: model_additional_0.pt
+
+Model data loaded from all models:
+Model 0 (model_additional_19950.pt):
+  - Additional data: 19950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 1 (model_additional_4950.pt):
+  - Additional data: 4950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 2 (model_additional_950.pt):
+  - Additional data: 950
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 3 (model_additional_200.pt):
+  - Additional data: 200
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+Model 4 (model_additional_0.pt):
+  - Additional data: 0
+  - Dataset type: data
+  - Training accuracies: 800 entries
+  - Test accuracies: 800 entries
+
+Loading dataset...
+Using dataset file: dataset.pt
+✅ Dataset loaded from /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/dataset.pt
+x_full shape: (20000, 256), base_train_size=50
+  computing cumulative loss curve for Model_19950
+  computing cumulative loss curve for Model_4950
+  computing cumulative loss curve for Model_950
+  computing cumulative loss curve for Model_200
+  computing cumulative loss curve for Model_0
+wrote /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/cutoffs/cutoffs.json

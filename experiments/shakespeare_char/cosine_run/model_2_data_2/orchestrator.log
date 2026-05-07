@@ -1,0 +1,363 @@
+[train] 5 jobs on GPUs 4..5 (LPT-first)
+[train] q=19950 -> cuda:4, log=train_q19950.log, pid=118380
+[train] q=4950 -> cuda:5, log=train_q4950.log, pid=118381
+[train] q=4950 (cuda:5) exit=0
+[train] q=950 -> cuda:5, log=train_q950.log, pid=122753
+[train] q=950 (cuda:5) exit=0
+[train] q=200 -> cuda:5, log=train_q200.log, pid=125178
+[train] q=200 (cuda:5) exit=0
+[train] q=0 -> cuda:5, log=train_q0.log, pid=125874
+[train] q=0 (cuda:5) exit=0
+[train] q=19950 (cuda:4) exit=0
+[train] elapsed 8043.5s
+[perturb] spawning 2 workers on GPUs 4..5
+[perturb] shard_0 -> cuda:4, log=perturb_shard_0.log, pid=139528
+[perturb] shard_1 -> cuda:5, log=perturb_shard_1.log, pid=139529
+[perturb] shard_0 exit=0
+[perturb] shard_1 exit=0
+[perturb] elapsed 7115.5s
+[merge] combining shard outputs
+[merge] data_0/data_0.npz: 50 dirs from 2 shards
+[merge] data_0/data_200.npz: 50 dirs from 2 shards
+[merge] data_0/data_950.npz: 50 dirs from 2 shards
+[merge] data_0/data_4950.npz: 50 dirs from 2 shards
+[merge] data_0/data_19950.npz: 50 dirs from 2 shards
+[merge] data_200/data_200.npz: 50 dirs from 2 shards
+[merge] data_200/data_950.npz: 50 dirs from 2 shards
+[merge] data_200/data_4950.npz: 50 dirs from 2 shards
+[merge] data_200/data_19950.npz: 50 dirs from 2 shards
+[merge] data_950/data_950.npz: 50 dirs from 2 shards
+[merge] data_950/data_4950.npz: 50 dirs from 2 shards
+[merge] data_950/data_19950.npz: 50 dirs from 2 shards
+[merge] data_4950/data_4950.npz: 50 dirs from 2 shards
+[merge] data_4950/data_19950.npz: 50 dirs from 2 shards
+[merge] data_19950/data_19950.npz: 50 dirs from 2 shards
+The size of the base dataset is  50
+Plot saved to: data_0/loss_2.0/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 7.7680960185825825, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(46299855.31504471), np.float64(44957582.621533744), np.float64(41174790.67340161), np.float64(38542361.389795996), np.float64(41177062.070509486)]
+Plot saved to: data_0/loss_2.0/gen.png
+Plot saved to: data_0/loss_2.0/test_vs_data.png
+Plot saved to: data_0/loss_2.0/avg.png
+Plot saved to: data_0/loss_2.0/hist.png
+Plot saved to: data_0/acc_0.5/avg.png
+Plot saved to: data_0/acc_0.5/hist.png
+Plot saved to: data_0/acc_0.5/log_volume.png
+Plot saved to: data_0/acc_0.5/gen.png
+[estimate] data_0/loss_2.0
+The size of the base dataset is  50
+Plot saved to: data_0/loss_1.0/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 7.7680960185825825, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(44252369.18515545), np.float64(42768015.34094661), np.float64(36587916.23802537), np.float64(36585515.34908602), np.float64(39455196.48801382)]
+Plot saved to: data_0/loss_1.0/gen.png
+Plot saved to: data_0/loss_1.0/test_vs_data.png
+Plot saved to: data_0/loss_1.0/avg.png
+Plot saved to: data_0/loss_1.0/hist.png
+Plot saved to: data_0/acc_0.7/avg.png
+Plot saved to: data_0/acc_0.7/hist.png
+Plot saved to: data_0/acc_0.7/log_volume.png
+Plot saved to: data_0/acc_0.7/gen.png
+[estimate] data_0/loss_1.0
+The size of the base dataset is  50
+Plot saved to: data_0/loss_0.5/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 7.7680960185825825, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(42769700.23415548), np.float64(40334801.21396278), np.float64(33275190.998017937), np.float64(34437105.09894711), np.float64(37587639.56154196)]
+Plot saved to: data_0/loss_0.5/gen.png
+Plot saved to: data_0/loss_0.5/test_vs_data.png
+Plot saved to: data_0/loss_0.5/avg.png
+Plot saved to: data_0/loss_0.5/hist.png
+Plot saved to: data_0/acc_0.85/avg.png
+Plot saved to: data_0/acc_0.85/hist.png
+Plot saved to: data_0/acc_0.85/log_volume.png
+Plot saved to: data_0/acc_0.85/gen.png
+[estimate] data_0/loss_0.5
+The size of the base dataset is  50
+Plot saved to: data_0/loss_0.1/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 7.7680960185825825, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(39457529.36705146), np.float64(37585400.295429684), np.float64(29355767.87232112), np.float64(30744012.831947986), np.float64(34436505.92698429)]
+Plot saved to: data_0/loss_0.1/gen.png
+Plot saved to: data_0/loss_0.1/test_vs_data.png
+Plot saved to: data_0/loss_0.1/avg.png
+Plot saved to: data_0/loss_0.1/hist.png
+Plot saved to: data_0/acc_0.9/avg.png
+Plot saved to: data_0/acc_0.9/hist.png
+Plot saved to: data_0/acc_0.9/log_volume.png
+Plot saved to: data_0/acc_0.9/gen.png
+[estimate] data_0/loss_0.1
+The size of the base dataset is  50
+Plot saved to: data_0/loss_0.05/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 7.7680960185825825, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(38542915.762699395), np.float64(36582864.227736615), np.float64(26281251.965431906), np.float64(29355767.87232112), np.float64(32046846.624716613)]
+Plot saved to: data_0/loss_0.05/gen.png
+Plot saved to: data_0/loss_0.05/test_vs_data.png
+Plot saved to: data_0/loss_0.05/avg.png
+Plot saved to: data_0/loss_0.05/hist.png
+Plot saved to: data_0/acc_0.95/avg.png
+Plot saved to: data_0/acc_0.95/hist.png
+Plot saved to: data_0/acc_0.95/log_volume.png
+Plot saved to: data_0/acc_0.95/gen.png
+[estimate] data_0/loss_0.05
+The size of the base dataset is  50
+Plot saved to: data_19950/loss_2.0/log_volume.png
+Test loss  [5.128079175949097]
+log_exp_r_n  [np.float64(38540514.87376005)]
+Plot saved to: data_19950/loss_2.0/gen.png
+Plot saved to: data_19950/loss_2.0/test_vs_data.png
+Plot saved to: data_19950/loss_2.0/avg.png
+Plot saved to: data_19950/loss_2.0/hist.png
+Plot saved to: data_19950/acc_0.5/avg.png
+Plot saved to: data_19950/acc_0.5/hist.png
+Plot saved to: data_19950/acc_0.5/log_volume.png
+Plot saved to: data_19950/acc_0.5/gen.png
+[estimate] data_19950/loss_2.0
+The size of the base dataset is  50
+Plot saved to: data_19950/loss_1.0/log_volume.png
+Test loss  [5.128079175949097]
+log_exp_r_n  [np.float64(36583738.137771316)]
+Plot saved to: data_19950/loss_1.0/gen.png
+/root/minima-volume-project/minima_volume/volume_funcs.py:623: RuntimeWarning: More than 20 figures have been opened. Figures created through the pyplot interface (`matplotlib.pyplot.figure`) are retained until explicitly closed and may consume too much memory. (To control this warning, see the rcParam `figure.max_open_warning`). Consider using `matplotlib.pyplot.close()`.
+  plt.figure(figsize=(8, 5))
+Plot saved to: data_19950/loss_1.0/test_vs_data.png
+Plot saved to: data_19950/loss_1.0/avg.png
+Plot saved to: data_19950/loss_1.0/hist.png
+Plot saved to: data_19950/acc_0.7/avg.png
+Plot saved to: data_19950/acc_0.7/hist.png
+Plot saved to: data_19950/acc_0.7/log_volume.png
+Plot saved to: data_19950/acc_0.7/gen.png
+[estimate] data_19950/loss_1.0
+The size of the base dataset is  50
+Plot saved to: data_19950/loss_0.5/log_volume.png
+Test loss  [5.128079175949097]
+log_exp_r_n  [np.float64(34437105.09894711)]
+Plot saved to: data_19950/loss_0.5/gen.png
+Plot saved to: data_19950/loss_0.5/test_vs_data.png
+Plot saved to: data_19950/loss_0.5/avg.png
+Plot saved to: data_19950/loss_0.5/hist.png
+Plot saved to: data_19950/acc_0.85/avg.png
+Plot saved to: data_19950/acc_0.85/hist.png
+Plot saved to: data_19950/acc_0.85/log_volume.png
+Plot saved to: data_19950/acc_0.85/gen.png
+[estimate] data_19950/loss_0.5
+The size of the base dataset is  50
+Plot saved to: data_19950/loss_0.1/log_volume.png
+Test loss  [5.128079175949097]
+log_exp_r_n  [np.float64(30744012.831947986)]
+Plot saved to: data_19950/loss_0.1/gen.png
+Plot saved to: data_19950/loss_0.1/test_vs_data.png
+Plot saved to: data_19950/loss_0.1/avg.png
+Plot saved to: data_19950/loss_0.1/hist.png
+Plot saved to: data_19950/acc_0.9/avg.png
+Plot saved to: data_19950/acc_0.9/hist.png
+Plot saved to: data_19950/acc_0.9/log_volume.png
+Plot saved to: data_19950/acc_0.9/gen.png
+[estimate] data_19950/loss_0.1
+The size of the base dataset is  50
+Plot saved to: data_19950/loss_0.05/log_volume.png
+Test loss  [5.128079175949097]
+log_exp_r_n  [np.float64(29355767.87232112)]
+Plot saved to: data_19950/loss_0.05/gen.png
+Plot saved to: data_19950/loss_0.05/test_vs_data.png
+Plot saved to: data_19950/loss_0.05/avg.png
+Plot saved to: data_19950/loss_0.05/hist.png
+Plot saved to: data_19950/acc_0.95/avg.png
+Plot saved to: data_19950/acc_0.95/hist.png
+Plot saved to: data_19950/acc_0.95/log_volume.png
+Plot saved to: data_19950/acc_0.95/gen.png
+[estimate] data_19950/loss_0.05
+The size of the base dataset is  50
+Plot saved to: data_200/loss_2.0/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(46299855.31504471), np.float64(44957582.621533744), np.float64(38540514.87376005), np.float64(41176360.46087157)]
+Plot saved to: data_200/loss_2.0/gen.png
+Plot saved to: data_200/loss_2.0/test_vs_data.png
+Plot saved to: data_200/loss_2.0/avg.png
+Plot saved to: data_200/loss_2.0/hist.png
+Plot saved to: data_200/acc_0.5/avg.png
+Plot saved to: data_200/acc_0.5/hist.png
+Plot saved to: data_200/acc_0.5/log_volume.png
+Plot saved to: data_200/acc_0.5/gen.png
+[estimate] data_200/loss_2.0
+The size of the base dataset is  50
+Plot saved to: data_200/loss_1.0/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(44252324.38609604), np.float64(42767921.72802125), np.float64(36583738.137771316), np.float64(39455196.48801382)]
+Plot saved to: data_200/loss_1.0/gen.png
+Plot saved to: data_200/loss_1.0/test_vs_data.png
+Plot saved to: data_200/loss_1.0/avg.png
+Plot saved to: data_200/loss_1.0/hist.png
+Plot saved to: data_200/acc_0.7/avg.png
+Plot saved to: data_200/acc_0.7/hist.png
+Plot saved to: data_200/acc_0.7/log_volume.png
+Plot saved to: data_200/acc_0.7/gen.png
+[estimate] data_200/loss_1.0
+The size of the base dataset is  50
+Plot saved to: data_200/loss_0.5/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(42769655.43509607), np.float64(40334801.21396278), np.float64(34437105.09894711), np.float64(37587040.38957915)]
+Plot saved to: data_200/loss_0.5/gen.png
+Plot saved to: data_200/loss_0.5/test_vs_data.png
+Plot saved to: data_200/loss_0.5/avg.png
+Plot saved to: data_200/loss_0.5/hist.png
+Plot saved to: data_200/acc_0.85/avg.png
+Plot saved to: data_200/acc_0.85/hist.png
+Plot saved to: data_200/acc_0.85/log_volume.png
+Plot saved to: data_200/acc_0.85/gen.png
+[estimate] data_200/loss_0.5
+The size of the base dataset is  50
+Plot saved to: data_200/loss_0.1/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(39457529.36705146), np.float64(37585306.682504326), np.float64(30744012.831947986), np.float64(34434772.21990947)]
+Plot saved to: data_200/loss_0.1/gen.png
+Plot saved to: data_200/loss_0.1/test_vs_data.png
+Plot saved to: data_200/loss_0.1/avg.png
+Plot saved to: data_200/loss_0.1/hist.png
+Plot saved to: data_200/acc_0.9/avg.png
+Plot saved to: data_200/acc_0.9/hist.png
+Plot saved to: data_200/acc_0.9/log_volume.png
+Plot saved to: data_200/acc_0.9/gen.png
+[estimate] data_200/loss_0.1
+The size of the base dataset is  50
+Plot saved to: data_200/loss_0.05/log_volume.png
+Test loss  [6.08520781993866, 8.753860473632812, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(38542915.762699395), np.float64(35539407.02295538), np.float64(29355767.87232112), np.float64(32046846.624716613)]
+Plot saved to: data_200/loss_0.05/gen.png
+Plot saved to: data_200/loss_0.05/test_vs_data.png
+Plot saved to: data_200/loss_0.05/avg.png
+Plot saved to: data_200/loss_0.05/hist.png
+Plot saved to: data_200/acc_0.95/avg.png
+Plot saved to: data_200/acc_0.95/hist.png
+Plot saved to: data_200/acc_0.95/log_volume.png
+Plot saved to: data_200/acc_0.95/gen.png
+[estimate] data_200/loss_0.05
+The size of the base dataset is  50
+Plot saved to: data_4950/loss_2.0/log_volume.png
+Test loss  [5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(38540514.87376005), np.float64(41177062.070509486)]
+Plot saved to: data_4950/loss_2.0/gen.png
+Plot saved to: data_4950/loss_2.0/test_vs_data.png
+Plot saved to: data_4950/loss_2.0/avg.png
+Plot saved to: data_4950/loss_2.0/hist.png
+Plot saved to: data_4950/acc_0.5/avg.png
+Plot saved to: data_4950/acc_0.5/hist.png
+Plot saved to: data_4950/acc_0.5/log_volume.png
+Plot saved to: data_4950/acc_0.5/gen.png
+[estimate] data_4950/loss_2.0
+The size of the base dataset is  50
+Plot saved to: data_4950/loss_1.0/log_volume.png
+Test loss  [5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(36583738.137771316), np.float64(39455196.48801382)]
+Plot saved to: data_4950/loss_1.0/gen.png
+Plot saved to: data_4950/loss_1.0/test_vs_data.png
+Plot saved to: data_4950/loss_1.0/avg.png
+Plot saved to: data_4950/loss_1.0/hist.png
+Plot saved to: data_4950/acc_0.7/avg.png
+Plot saved to: data_4950/acc_0.7/hist.png
+Plot saved to: data_4950/acc_0.7/log_volume.png
+Plot saved to: data_4950/acc_0.7/gen.png
+[estimate] data_4950/loss_1.0
+The size of the base dataset is  50
+Plot saved to: data_4950/loss_0.5/log_volume.png
+Test loss  [5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(34437105.09894711), np.float64(37587040.38957915)]
+Plot saved to: data_4950/loss_0.5/gen.png
+Plot saved to: data_4950/loss_0.5/test_vs_data.png
+Plot saved to: data_4950/loss_0.5/avg.png
+Plot saved to: data_4950/loss_0.5/hist.png
+Plot saved to: data_4950/acc_0.85/avg.png
+Plot saved to: data_4950/acc_0.85/hist.png
+Plot saved to: data_4950/acc_0.85/log_volume.png
+Plot saved to: data_4950/acc_0.85/gen.png
+[estimate] data_4950/loss_0.5
+The size of the base dataset is  50
+Plot saved to: data_4950/loss_0.1/log_volume.png
+Test loss  [5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(30744012.831947986), np.float64(34434772.21990947)]
+Plot saved to: data_4950/loss_0.1/gen.png
+Plot saved to: data_4950/loss_0.1/test_vs_data.png
+Plot saved to: data_4950/loss_0.1/avg.png
+Plot saved to: data_4950/loss_0.1/hist.png
+Plot saved to: data_4950/acc_0.9/avg.png
+Plot saved to: data_4950/acc_0.9/hist.png
+Plot saved to: data_4950/acc_0.9/log_volume.png
+Plot saved to: data_4950/acc_0.9/gen.png
+[estimate] data_4950/loss_0.1
+The size of the base dataset is  50
+Plot saved to: data_4950/loss_0.05/log_volume.png
+Test loss  [5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(29357068.653921857), np.float64(32046846.624716613)]
+Plot saved to: data_4950/loss_0.05/gen.png
+Plot saved to: data_4950/loss_0.05/test_vs_data.png
+Plot saved to: data_4950/loss_0.05/avg.png
+Plot saved to: data_4950/loss_0.05/hist.png
+Plot saved to: data_4950/acc_0.95/avg.png
+Plot saved to: data_4950/acc_0.95/hist.png
+Plot saved to: data_4950/acc_0.95/log_volume.png
+Plot saved to: data_4950/acc_0.95/gen.png
+[estimate] data_4950/loss_0.05
+The size of the base dataset is  50
+Plot saved to: data_950/loss_2.0/log_volume.png
+Test loss  [6.08520781993866, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(46299855.31504471), np.float64(38540582.883661754), np.float64(41176360.46087157)]
+Plot saved to: data_950/loss_2.0/gen.png
+Plot saved to: data_950/loss_2.0/test_vs_data.png
+Plot saved to: data_950/loss_2.0/avg.png
+Plot saved to: data_950/loss_2.0/hist.png
+Plot saved to: data_950/acc_0.5/avg.png
+Plot saved to: data_950/acc_0.5/hist.png
+Plot saved to: data_950/acc_0.5/log_volume.png
+Plot saved to: data_950/acc_0.5/gen.png
+[estimate] data_950/loss_2.0
+The size of the base dataset is  50
+Plot saved to: data_950/loss_1.0/log_volume.png
+Test loss  [6.08520781993866, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(44252324.38609604), np.float64(36583738.137771316), np.float64(39455196.48801382)]
+Plot saved to: data_950/loss_1.0/gen.png
+Plot saved to: data_950/loss_1.0/test_vs_data.png
+Plot saved to: data_950/loss_1.0/avg.png
+Plot saved to: data_950/loss_1.0/hist.png
+Plot saved to: data_950/acc_0.7/avg.png
+Plot saved to: data_950/acc_0.7/hist.png
+Plot saved to: data_950/acc_0.7/log_volume.png
+Plot saved to: data_950/acc_0.7/gen.png
+[estimate] data_950/loss_1.0
+The size of the base dataset is  50
+Plot saved to: data_950/loss_0.5/log_volume.png
+Test loss  [6.08520781993866, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(42769655.43509607), np.float64(34437105.09894711), np.float64(37587040.38957915)]
+Plot saved to: data_950/loss_0.5/gen.png
+Plot saved to: data_950/loss_0.5/test_vs_data.png
+Plot saved to: data_950/loss_0.5/avg.png
+Plot saved to: data_950/loss_0.5/hist.png
+Plot saved to: data_950/acc_0.85/avg.png
+Plot saved to: data_950/acc_0.85/hist.png
+Plot saved to: data_950/acc_0.85/log_volume.png
+Plot saved to: data_950/acc_0.85/gen.png
+[estimate] data_950/loss_0.5
+The size of the base dataset is  50
+Plot saved to: data_950/loss_0.1/log_volume.png
+Test loss  [6.08520781993866, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(39457529.36705146), np.float64(30744012.831947986), np.float64(34434772.21990947)]
+Plot saved to: data_950/loss_0.1/gen.png
+Plot saved to: data_950/loss_0.1/test_vs_data.png
+Plot saved to: data_950/loss_0.1/avg.png
+Plot saved to: data_950/loss_0.1/hist.png
+Plot saved to: data_950/acc_0.9/avg.png
+Plot saved to: data_950/acc_0.9/hist.png
+Plot saved to: data_950/acc_0.9/log_volume.png
+Plot saved to: data_950/acc_0.9/gen.png
+[estimate] data_950/loss_0.1
+The size of the base dataset is  50
+Plot saved to: data_950/loss_0.05/log_volume.png
+Test loss  [6.08520781993866, 5.128079175949097, 5.694110989570618]
+log_exp_r_n  [np.float64(38542915.762699395), np.float64(29355767.87232112), np.float64(32046846.624716613)]
+Plot saved to: data_950/loss_0.05/gen.png
+Plot saved to: data_950/loss_0.05/test_vs_data.png
+Plot saved to: data_950/loss_0.05/avg.png
+Plot saved to: data_950/loss_0.05/hist.png
+Plot saved to: data_950/acc_0.95/avg.png
+Plot saved to: data_950/acc_0.95/hist.png
+Plot saved to: data_950/acc_0.95/log_volume.png
+Plot saved to: data_950/acc_0.95/gen.png
+[estimate] data_950/loss_0.05
+
+=== overnight_run complete in 15235.9s ===

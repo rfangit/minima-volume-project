@@ -1,0 +1,18 @@
+[train q=0] device=cuda
+number of parameters: 10.65M
+[train q=0] N=50 batch=50 params=10,745,088 lr=0.001 cosine_min=1e-05
+Epoch 1/800: Train Loss 4.2701 | Test Loss 3.5798 | accs Train 0.0191 Test 0.1479 | LR 1.00e-03
+Epoch 80/800: Train Loss 3.0068 | Test Loss 3.0344 | accs Train 0.1895 Test 0.1846 | LR 9.76e-04
+Epoch 160/800: Train Loss 2.1341 | Test Loss 3.4692 | accs Train 0.3869 Test 0.2107 | LR 9.05e-04
+Epoch 240/800: Train Loss 1.1617 | Test Loss 4.4327 | accs Train 0.6656 Test 0.1623 | LR 7.96e-04
+Epoch 320/800: Train Loss 0.8029 | Test Loss 5.4381 | accs Train 0.7667 Test 0.1538 | LR 6.58e-04
+Epoch 400/800: Train Loss 0.3214 | Test Loss 5.9822 | accs Train 0.9119 Test 0.1459 | LR 5.05e-04
+Epoch 480/800: Train Loss 0.0161 | Test Loss 6.9524 | accs Train 0.9974 Test 0.1497 | LR 3.52e-04
+Epoch 560/800: Train Loss 0.1193 | Test Loss 7.2532 | accs Train 0.9633 Test 0.1480 | LR 2.14e-04
+Epoch 640/800: Train Loss 0.0079 | Test Loss 7.4670 | accs Train 0.9977 Test 0.1503 | LR 1.05e-04
+Epoch 720/800: Train Loss 0.0065 | Test Loss 7.6387 | accs Train 0.9978 Test 0.1507 | LR 3.42e-05
+Epoch 800/800: Train Loss 0.0058 | Test Loss 7.7681 | accs Train 0.9978 Test 0.1519 | LR 1.00e-05
+[train q=0] training done in 58.2s, final train_loss=0.0058
+✅ Dataset saved to /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/dataset.pt
+✅ Model saved to /root/minima-volume-project/experiments/shakespeare_char/cosine_run/model_2_data_2/models_and_data/model_additional_0.pt
+[train q=0] saved
